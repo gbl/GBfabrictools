@@ -24,8 +24,10 @@ public class KeyBindingManager {
     }
     
     public static void processKeyBinds() {
-        for (KeyBindingHandler handler: handlers) {
-            handler.processKeyBinds();
+        if (handlers != null) {
+            for (KeyBindingHandler handler: handlers) {
+                handler.processKeyBinds();
+            }
         }
     }
 }

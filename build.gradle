@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.2.0-SNAPSHOT'
+	id 'fabric-loom' version '0.2.1-SNAPSHOT'
 }
 
 apply plugin: 'maven'
@@ -8,7 +8,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 archivesBaseName = "GBfabrictools"
-version = "1.0.0"
+version = "1.0.1"
 
 minecraft {
 	refmapName = "de-guntram-mcmod-fabrictools-refmap.json";
@@ -22,6 +22,7 @@ dependencies {
 	modCompile "net.fabricmc:fabric:0.2.7+build.126"
 }
 
+
 // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
 // if it is present.
 // If you remove this task, sources will not be generated.
@@ -34,7 +35,7 @@ group = "de.guntram.mcmod"
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "file://localhost/tmp/mymavenrepo/")
+	    repository(url: "file://localhost/tmp/mymavenrepo")
         }
     }
 }
