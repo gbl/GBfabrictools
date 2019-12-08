@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.StringTextComponent;
-import net.minecraft.text.TranslatableTextComponent;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.MathHelper;
 
 public class GuiModOptions extends Screen implements Supplier<Screen> {
@@ -23,7 +23,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public GuiModOptions(Screen parent, String modName, ModConfigurationHandler confHandler) {
-        super(new StringTextComponent(modName));
+        super(new LiteralText(modName));
         this.parent=parent;
         this.modName=modName;
         this.handler=confHandler;
@@ -33,7 +33,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     
     @Override
     protected void init() {
-        this.addButton(new AbstractButtonWidget(this.width / 2 - 100, this.height - 27, new TranslatableTextComponent("gui.done").getText()) {
+        this.addButton(new AbstractButtonWidget(this.width / 2 - 100, this.height - 27, I18n.translate("gui.done")) {
             @Override
             public void onClick(double x, double y) {
                 handler.onConfigChanged(new ConfigChangedEvent.OnConfigChangedEvent(modName));
@@ -109,7 +109,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                 if (tooltip==null)
                     tooltip="missing tooltip";
                 if (tooltip.length()<=30) {
-                    renderComponentHoverEffect(new StringTextComponent(handler.getConfig().getTooltip(text)), mouseX, mouseY);
+                    renderComponentHoverEffect(new LiteralText(handler.getConfig().getTooltip(text)), mouseX, mouseY);
                 } else {
                     List<String>lines=new ArrayList<>();
                     int pos=0;

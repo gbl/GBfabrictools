@@ -6,9 +6,10 @@
 package de.guntram.mcmod.fabrictools;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.text.TranslatableTextComponent;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.LiteralText;
 
 /**
  *
@@ -19,7 +20,7 @@ public class ConfigurableModList extends Screen {
     private final Screen parent;
     
     public ConfigurableModList(Screen parent) {
-        super(new TranslatableTextComponent("mod.options", new Object[0]));
+        super(new LiteralText(I18n.translate("mod.options", new Object[0])));
         this.parent = parent;
     }
     

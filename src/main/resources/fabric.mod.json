@@ -1,7 +1,7 @@
 {
     "schemaVersion": 1,
     "id": "gbfabrictools",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "environment": "client",
     "entrypoints": {
         "client": [ "de.guntram.mcmod.fabrictools.DummyMain" ]

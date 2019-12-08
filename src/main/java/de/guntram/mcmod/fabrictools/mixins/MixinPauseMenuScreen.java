@@ -7,11 +7,9 @@ package de.guntram.mcmod.fabrictools.mixins;
 
 import de.guntram.mcmod.fabrictools.ConfigurableModList;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.gui.menu.PauseMenuScreen;
-import net.minecraft.client.gui.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.gui.screen.GameMenuScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,15 +20,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  *
  * @author gbl
  */
-@Mixin(PauseMenuScreen.class)
+@Mixin(GameMenuScreen.class)
 public class MixinPauseMenuScreen extends Screen {
     MixinPauseMenuScreen() { super(null); }
 
     @Inject(method="init", at=@At("RETURN"))
     public void addConfigScreen(CallbackInfo ci) {
         if (!FabricLoader.getInstance().isModLoaded("modmenu")) {
-            this.addButton(new RecipeBookButtonWidget(this.width - 24, 8,
-                    20, 20, 0, 0, 0, new Identifier("textures/item/written_book.png"), 16, 16, (buttonWidget_1) -> {
+            this.addButton(new TexturedButtonWidget(this.width - 24, 8,
+                    20, 20, 0, 0, 0, new Identifier("textures/item/written_book.png"), 20, 20, (buttonWidget_1) -> {
                this.minecraft.openScreen(new ConfigurableModList((Screen)this));
             }));
         }
