@@ -1,16 +1,19 @@
 package de.guntram.mcmod.fabrictools;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import de.guntram.mcmod.fabrictools.ConfigChangedEvent.OnConfigChangingEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.MathHelper;
+import org.apache.logging.log4j.LogManager;
 
 public class GuiModOptions extends Screen implements Supplier<Screen> {
     
@@ -47,6 +50,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
             Object value = handler.getConfig().getValue(text);
             AbstractButtonWidget element;
             if (value == null) {
+                LogManager.getLogger().warn("value null, adding nothing");
                 continue;
             } else if (value instanceof Boolean) {
                 element = this.addButton(new AbstractButtonWidget(this.width/2+10, y, ((Boolean) value == true ? "true" : "false")) {
@@ -54,8 +58,10 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                     public void onClick(double x, double y) {
                         if ((Boolean)(handler.getConfig().getValue(text))==true) {
                             handler.getConfig().setValue(text, false);
+                            handler.onConfigChanging(new OnConfigChangingEvent(modName, text, false));
                         } else {
                             handler.getConfig().setValue(text, true);
+                            handler.onConfigChanging(new OnConfigChangingEvent(modName, text, true));
                         }
                         this.changeFocus(true);
                     }
@@ -66,24 +72,35 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                     }
                 });
             } else if (value instanceof String) {
-                element=new TextFieldWidget(this.font, this.width/2+10, y, 200, 20, (String) value) {
+                element=this.addButton(new TextFieldWidget(this.font, this.width/2+10, y, 200, 20, (String) value) {
                     @Override
                     public void onFocusedChanged(boolean b) {
-                        this.setText((String) handler.getConfig().getValue(text));
+                        if (b) {
+                            this.setText((String) handler.getConfig().getValue(text));
+                        } else {
+                            handler.getConfig().setValue(text, this.getText());
+                        }
                         super.onFocusedChanged(b);
                     }
-                };
+                    @Override
+                    public boolean charTyped(char chr, int keyCode) {
+                        boolean result = super.charTyped(chr, keyCode);
+                        handler.onConfigChanging(new OnConfigChangingEvent(modName, text, this.getText()));
+                        return result;
+                    }
+                });
                 element.changeFocus(false);
-                this.children.add(element);
             } else if (value instanceof Integer || value instanceof Float || value instanceof Double) {
                 element=this.addButton(new GuiSlider(this.width/2+10, y, handler.getConfig(), text));
             } else {
+                LogManager.getLogger().warn(modName +" has option "+text+" with data type "+value.getClass().getName());
                 continue;
             }
             this.addButton(new AbstractButtonWidget(this.width/2+220, y, 20, 20, "") {
                 @Override
                 public void onClick(double x, double y) {
                     handler.getConfig().setValue(text, handler.getConfig().getDefault(text));
+                    handler.onConfigChanging(new OnConfigChangingEvent(modName, text, handler.getConfig().getDefault(text)));
                     element.changeFocus(false);
                 }
             });
@@ -143,6 +160,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         Configuration config;
         String configOption;
         
+        @SuppressWarnings("OverridableMethodCallInConstructor")
         GuiSlider(int x, int y, Configuration config, String option) {
             super(x, y, 200, 20, "?");
             Object value=config.getValue(option);
@@ -177,16 +195,19 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                     double doubleVal=value*(max-min)+min;
                     this.setMessage(Double.toString(doubleVal));
                     this.config.setValue(configOption, (Double) doubleVal);
+                    handler.onConfigChanging(new OnConfigChangingEvent(modName, configOption, doubleVal));
                     break;
                 case FLOAT:
                     float floatVal=(float) (value*(max-min)+min);
                     this.setMessage(Float.toString(floatVal));
                     this.config.setValue(configOption, (Float) floatVal);
+                    handler.onConfigChanging(new OnConfigChangingEvent(modName, configOption, floatVal));
                     break;
                 case INT:
                     int intVal=(int) (value*(max-min)+min);
                     this.setMessage(Integer.toString(intVal));
                     this.config.setValue(configOption, (Integer) intVal);
+                    handler.onConfigChanging(new OnConfigChangingEvent(modName, configOption, intVal));
                     break;
             }
         }

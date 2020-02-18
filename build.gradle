@@ -8,7 +8,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 archivesBaseName = "GBfabrictools"
-version = "1.1.0"
+version = "1.2.0"
 
 minecraft {
 	refmapName = "de-guntram-mcmod-fabrictools-refmap.json";
