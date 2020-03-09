@@ -36,11 +36,11 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     
     @Override
     protected void init() {
-        this.addButton(new AbstractButtonWidget(this.width / 2 - 100, this.height - 27, I18n.translate("gui.done")) {
+        this.addButton(new AbstractButtonWidget(this.width / 2 - 100, this.height - 27, 200, 20, I18n.translate("gui.done")) {
             @Override
             public void onClick(double x, double y) {
                 handler.onConfigChanged(new ConfigChangedEvent.OnConfigChangedEvent(modName));
-                minecraft.openScreen(parent);
+                client.openScreen(parent);
             }
         });
         
@@ -53,7 +53,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                 LogManager.getLogger().warn("value null, adding nothing");
                 continue;
             } else if (value instanceof Boolean) {
-                element = this.addButton(new AbstractButtonWidget(this.width/2+10, y, ((Boolean) value == true ? "true" : "false")) {
+                element = this.addButton(new AbstractButtonWidget(this.width/2+10, y,  200, 20,((Boolean) value == true ? "true" : "false")) {
                     @Override
                     public void onClick(double x, double y) {
                         if ((Boolean)(handler.getConfig().getValue(text))==true) {
@@ -72,7 +72,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                     }
                 });
             } else if (value instanceof String) {
-                element=this.addButton(new TextFieldWidget(this.font, this.width/2+10, y, 200, 20, (String) value) {
+                element=this.addButton(new TextFieldWidget(this.textRenderer, this.width/2+10, y, 200, 20, (String) value) {
                     @Override
                     public void onFocusedChanged(boolean b) {
                         if (b) {
@@ -110,12 +110,12 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
         renderBackground();
-        drawCenteredString(font, screenTitle, this.width/2, 20, 0xffffff);
+        drawCenteredString(textRenderer, screenTitle, this.width/2, 20, 0xffffff);
         super.render(mouseX, mouseY, partialTicks);
         
         int y=50;
         for (String text: options) {
-            drawString(font, text, this.width / 2 -155, y+2, 0xffffff);
+            drawString(textRenderer, text, this.width / 2 -155, y+2, 0xffffff);
             y+=20;
         }
 
@@ -126,7 +126,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                 if (tooltip==null)
                     tooltip="missing tooltip";
                 if (tooltip.length()<=30) {
-                    renderComponentHoverEffect(new LiteralText(handler.getConfig().getTooltip(text)), mouseX, mouseY);
+                    renderTextHoverEffect(new LiteralText(handler.getConfig().getTooltip(text)), mouseX, mouseY);
                 } else {
                     List<String>lines=new ArrayList<>();
                     int pos=0;

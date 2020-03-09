@@ -29,7 +29,7 @@ public class MixinPauseMenuScreen extends Screen {
         if (!FabricLoader.getInstance().isModLoaded("modmenu")) {
             this.addButton(new TexturedButtonWidget(this.width - 24, 8,
                     20, 20, 0, 0, 0, new Identifier("textures/item/written_book.png"), 20, 20, (buttonWidget_1) -> {
-               this.minecraft.openScreen(new ConfigurableModList((Screen)this));
+               this.client.openScreen(new ConfigurableModList((Screen)this));
             }));
         }
     }
