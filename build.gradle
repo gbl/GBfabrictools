@@ -7,18 +7,22 @@ apply plugin: 'maven'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+ext.Versions = new Properties()
+Versions.load(file("../mcversion-20w10a.properties").newReader())
+println Versions['minecraft_version']
+
 archivesBaseName = "GBfabrictools"
-version = "1.2.0.20w10a"
+version = "1.2.0.${Versions['minecraft_version']}"
 
 minecraft {
 	refmapName = "de-guntram-mcmod-fabrictools-refmap.json";
 }
 
 dependencies {
-    minecraft  "com.mojang:minecraft:20w10a"
-    mappings   "net.fabricmc:yarn:20w10a+build.10:v2"
-    modCompile "net.fabricmc:fabric-loader:0.7.8+build.186"
-    modCompile "net.fabricmc.fabric-api:fabric-api:0.5.1+build.305-1.16"
+    minecraft  "com.mojang:minecraft:${Versions['minecraft_version']}"
+    mappings   "net.fabricmc:yarn:${Versions['yarn_mappings']}:v2"
+    modCompile "net.fabricmc:fabric-loader:${Versions['loader_version']}"
+    modCompile "net.fabricmc.fabric-api:fabric-api:${Versions['fabric_version']}"
 }
 
 
@@ -37,4 +41,8 @@ uploadArchives {
 	    repository(url: "file://localhost/tmp/mymavenrepo")
         }
     }
+}
+
+task publish(dependsOn: uploadArchives, type: Exec) {
+    commandLine "rsync", "-av", "/tmp/mymavenrepo/", "maven@minecraft.guntram.de:/var/www/html/maven/"
 }
