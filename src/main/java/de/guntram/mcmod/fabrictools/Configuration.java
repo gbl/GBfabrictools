@@ -141,6 +141,14 @@ public class Configuration {
     public String getTooltip(String description) {
         return items.get(description).toolTip;
     }
+    
+    /**
+     * Forgets about a config parameter that was, for example, present in older versions.
+     * @param item
+     */
+    public void forget(String item) {
+        items.remove(item);
+    }
 
     public boolean setValue(String description, Object value) {
         ConfigurationItem item=items.get(description);

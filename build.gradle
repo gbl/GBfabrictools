@@ -9,13 +9,24 @@ targetCompatibility = 1.8
 
 ext.Versions = new Properties()
 Versions.load(file("../mcversion-20w10a.properties").newReader())
-println Versions['minecraft_version']
 
 archivesBaseName = "GBfabrictools"
-version = "1.2.0.${Versions['minecraft_version']}"
+version = "1.2.1.${Versions['minecraft_version']}"
 
 minecraft {
 	refmapName = "de-guntram-mcmod-fabrictools-refmap.json";
+}
+
+processResources {
+	inputs.property "version", project.version
+
+    from(sourceSets.main.resources.srcDirs) {
+		include "fabric.mod.json"
+		expand "version": project.version
+	}
+	from(sourceSets.main.resources.srcDirs) {
+		exclude "fabric.mod.json"
+	}
 }
 
 dependencies {

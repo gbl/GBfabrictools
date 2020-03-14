@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -14,6 +13,7 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.MathHelper;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class GuiModOptions extends Screen implements Supplier<Screen> {
     
@@ -21,8 +21,12 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     private final String modName;
     private final ModConfigurationHandler handler;
     private final List<String> options;
+    private final Logger LOGGER;
     
     private String screenTitle;
+    
+    private static final int LINEHEIGHT = 25;
+    private static final int BUTTONHEIGHT = 20;
     
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public GuiModOptions(Screen parent, String modName, ModConfigurationHandler confHandler) {
@@ -32,6 +36,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         this.handler=confHandler;
         this.screenTitle=modName+" Configuration";
         this.options=handler.getConfig().getKeys();
+        this.LOGGER=LogManager.getLogger();
     }
     
     @Override
@@ -39,21 +44,28 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         this.addButton(new AbstractButtonWidget(this.width / 2 - 100, this.height - 27, 200, 20, I18n.translate("gui.done")) {
             @Override
             public void onClick(double x, double y) {
+                for (AbstractButtonWidget button: buttons) {
+                    if (button instanceof TextFieldWidget) {
+                        if (button.isFocused()) {
+                            button.changeFocus(false);
+                        }
+                    }
+                }
                 handler.onConfigChanged(new ConfigChangedEvent.OnConfigChangedEvent(modName));
                 client.openScreen(parent);
             }
         });
         
-        int y=30;
+        int y=50-LINEHEIGHT;
         for (String text: options) {
-            y+=20;
+            y+=LINEHEIGHT;
             Object value = handler.getConfig().getValue(text);
             AbstractButtonWidget element;
             if (value == null) {
                 LogManager.getLogger().warn("value null, adding nothing");
                 continue;
             } else if (value instanceof Boolean) {
-                element = this.addButton(new AbstractButtonWidget(this.width/2+10, y,  200, 20,((Boolean) value == true ? "true" : "false")) {
+                element = this.addButton(new AbstractButtonWidget(this.width/2+10, y, 200, BUTTONHEIGHT, ((Boolean) value == true ? "§2true" : "§4false")) {
                     @Override
                     public void onClick(double x, double y) {
                         if ((Boolean)(handler.getConfig().getValue(text))==true) {
@@ -67,17 +79,19 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                     }
                     @Override
                     public void onFocusedChanged(boolean b) {
-                        this.setMessage((Boolean) handler.getConfig().getValue(text) == true ? "true" : "false");
+                        this.setMessage((Boolean) handler.getConfig().getValue(text) == true ? "§2true" : "§4false");
                         super.onFocusedChanged(b);
                     }
                 });
             } else if (value instanceof String) {
-                element=this.addButton(new TextFieldWidget(this.textRenderer, this.width/2+10, y, 200, 20, (String) value) {
+                element=this.addButton(new TextFieldWidget(this.textRenderer, this.width/2+10, y, 200, BUTTONHEIGHT, (String) value) {
                     @Override
                     public void onFocusedChanged(boolean b) {
                         if (b) {
+                            // LOGGER.info("value to textfield");
                             this.setText((String) handler.getConfig().getValue(text));
                         } else {
+                            // LOGGER.info("textfield to value");
                             handler.getConfig().setValue(text, this.getText());
                         }
                         super.onFocusedChanged(b);
@@ -88,6 +102,14 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                         handler.onConfigChanging(new OnConfigChangingEvent(modName, text, this.getText()));
                         return result;
                     }
+
+                    @Override
+                    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                        boolean result = super.keyPressed(keyCode, scanCode, modifiers);
+                        handler.onConfigChanging(new OnConfigChangingEvent(modName, text, this.getText()));
+                        return result;
+                    }
+                    
                 });
                 element.changeFocus(false);
             } else if (value instanceof Integer || value instanceof Float || value instanceof Double) {
@@ -96,7 +118,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                 LogManager.getLogger().warn(modName +" has option "+text+" with data type "+value.getClass().getName());
                 continue;
             }
-            this.addButton(new AbstractButtonWidget(this.width/2+220, y, 20, 20, "") {
+            this.addButton(new AbstractButtonWidget(this.width/2+220, y, BUTTONHEIGHT, BUTTONHEIGHT, "") {
                 @Override
                 public void onClick(double x, double y) {
                     handler.getConfig().setValue(text, handler.getConfig().getDefault(text));
@@ -110,18 +132,18 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
         renderBackground();
-        drawCenteredString(textRenderer, screenTitle, this.width/2, 20, 0xffffff);
+        drawCenteredString(textRenderer, screenTitle, this.width/2, BUTTONHEIGHT, 0xffffff);
         super.render(mouseX, mouseY, partialTicks);
         
         int y=50;
         for (String text: options) {
             drawString(textRenderer, text, this.width / 2 -155, y+2, 0xffffff);
-            y+=20;
+            y+=LINEHEIGHT;
         }
 
         y=50;
         for (String text: options) {
-            if (mouseX>this.width/2-155 && mouseX<this.width/2 && mouseY>y && mouseY<y+20) {
+            if (mouseX>this.width/2-155 && mouseX<this.width/2 && mouseY>y && mouseY<y+BUTTONHEIGHT) {
                 String tooltip=handler.getConfig().getTooltip(text);
                 if (tooltip==null)
                     tooltip="missing tooltip";
@@ -142,7 +164,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                     renderTooltip(lines, mouseX, mouseY);
                 }
             }
-            y+=20;
+            y+=LINEHEIGHT;
         }
     }
 
@@ -162,7 +184,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         
         @SuppressWarnings("OverridableMethodCallInConstructor")
         GuiSlider(int x, int y, Configuration config, String option) {
-            super(x, y, 200, 20, "?");
+            super(x, y, 200, BUTTONHEIGHT, "?");
             Object value=config.getValue(option);
             if (value instanceof Double) {
                 this.setMessage(Double.toString((Double)value));
