@@ -9,6 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 
 /**
@@ -31,13 +32,13 @@ public class ConfigurableModList extends Screen {
         int size = this.width / 4 - 20;
 
         for (String modName: ConfigurationProvider.getRegisteredMods()) {
-            this.addButton(new AbstractButtonWidget(x+10, y, size, 20, modName) {
+            this.addButton(new AbstractButtonWidget(x+10, y, size, 20, new LiteralText(modName)) {
                 @Override
                 public void onClick(double x, double y) {
-                    ModConfigurationHandler handler = ConfigurationProvider.getHandler(this.getMessage());
+                    ModConfigurationHandler handler = ConfigurationProvider.getHandler(this.getMessage().asString());
                     if (handler != null) {
                         MinecraftClient.getInstance().openScreen(
-                                new GuiModOptions(parent, this.getMessage(), handler)
+                                new GuiModOptions(parent, this.getMessage().asString(), handler)
                         );
                     }
                 }
@@ -51,8 +52,8 @@ public class ConfigurableModList extends Screen {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
-        renderBackground();
-        super.render(mouseX, mouseY, partialTicks);
+    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        renderBackground(stack);
+        super.render(stack, mouseX, mouseY, partialTicks);
     }
 }

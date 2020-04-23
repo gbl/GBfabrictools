@@ -9,8 +9,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.MathHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,7 +43,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     
     @Override
     protected void init() {
-        this.addButton(new AbstractButtonWidget(this.width / 2 - 100, this.height - 27, 200, 20, I18n.translate("gui.done")) {
+        this.addButton(new AbstractButtonWidget(this.width / 2 - 100, this.height - 27, 200, 20, new TranslatableText("gui.done")) {
             @Override
             public void onClick(double x, double y) {
                 for (AbstractButtonWidget button: buttons) {
@@ -65,7 +67,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                 LogManager.getLogger().warn("value null, adding nothing");
                 continue;
             } else if (value instanceof Boolean) {
-                element = this.addButton(new AbstractButtonWidget(this.width/2+10, y, 200, BUTTONHEIGHT, ((Boolean) value == true ? "§2true" : "§4false")) {
+                element = this.addButton(new AbstractButtonWidget(this.width/2+10, y, 200, BUTTONHEIGHT, new LiteralText((Boolean) value == true ? "§2true" : "§4false")) {
                     @Override
                     public void onClick(double x, double y) {
                         if ((Boolean)(handler.getConfig().getValue(text))==true) {
@@ -79,12 +81,12 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                     }
                     @Override
                     public void onFocusedChanged(boolean b) {
-                        this.setMessage((Boolean) handler.getConfig().getValue(text) == true ? "§2true" : "§4false");
+                        this.setMessage(new LiteralText((Boolean) handler.getConfig().getValue(text) == true ? "§2true" : "§4false"));
                         super.onFocusedChanged(b);
                     }
                 });
             } else if (value instanceof String) {
-                element=this.addButton(new TextFieldWidget(this.textRenderer, this.width/2+10, y, 200, BUTTONHEIGHT, (String) value) {
+                element=this.addButton(new TextFieldWidget(this.textRenderer, this.width/2+10, y, 200, BUTTONHEIGHT, new LiteralText((String) value)) {
                     @Override
                     public void onFocusedChanged(boolean b) {
                         if (b) {
@@ -118,7 +120,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                 LogManager.getLogger().warn(modName +" has option "+text+" with data type "+value.getClass().getName());
                 continue;
             }
-            this.addButton(new AbstractButtonWidget(this.width/2+220, y, BUTTONHEIGHT, BUTTONHEIGHT, "") {
+            this.addButton(new AbstractButtonWidget(this.width/2+220, y, BUTTONHEIGHT, BUTTONHEIGHT, new LiteralText("")) {
                 @Override
                 public void onClick(double x, double y) {
                     handler.getConfig().setValue(text, handler.getConfig().getDefault(text));
@@ -130,14 +132,14 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
-        renderBackground();
-        drawCenteredString(textRenderer, screenTitle, this.width/2, BUTTONHEIGHT, 0xffffff);
-        super.render(mouseX, mouseY, partialTicks);
+    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        renderBackground(stack);
+        drawCenteredString(stack, textRenderer, screenTitle, this.width/2, BUTTONHEIGHT, 0xffffff);
+        super.render(stack, mouseX, mouseY, partialTicks);
         
         int y=50;
         for (String text: options) {
-            drawString(textRenderer, text, this.width / 2 -155, y+2, 0xffffff);
+            drawString(stack, textRenderer, text, this.width / 2 -155, y+2, 0xffffff);
             y+=LINEHEIGHT;
         }
 
@@ -148,20 +150,20 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                 if (tooltip==null)
                     tooltip="missing tooltip";
                 if (tooltip.length()<=30) {
-                    renderTextHoverEffect(new LiteralText(handler.getConfig().getTooltip(text)), mouseX, mouseY);
+                    renderTextHoverEffect(stack, new LiteralText(handler.getConfig().getTooltip(text)), mouseX, mouseY);
                 } else {
-                    List<String>lines=new ArrayList<>();
+                    List<Text>lines=new ArrayList<>();
                     int pos=0;
                     while (pos<tooltip.length()-30) {
                         int curlen=30;
                         while (tooltip.charAt(pos+curlen)!=' ' && curlen>10) {
                             curlen--;
                         }
-                        lines.add(tooltip.substring(pos, pos+curlen));
+                        lines.add(new LiteralText(tooltip.substring(pos, pos+curlen)));
                         pos+=curlen+1;
                     }
-                    lines.add(tooltip.substring(pos));
-                    renderTooltip(lines, mouseX, mouseY);
+                    lines.add(new LiteralText(tooltip.substring(pos)));
+                    renderTooltip(stack, lines, mouseX, mouseY);
                 }
             }
             y+=LINEHEIGHT;
@@ -184,23 +186,23 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         
         @SuppressWarnings("OverridableMethodCallInConstructor")
         GuiSlider(int x, int y, Configuration config, String option) {
-            super(x, y, 200, BUTTONHEIGHT, "?");
+            super(x, y, 200, BUTTONHEIGHT, new LiteralText("?"));
             Object value=config.getValue(option);
             if (value instanceof Double) {
-                this.setMessage(Double.toString((Double)value));
+                this.setMessage(new LiteralText(Double.toString((Double)value)));
                 this.min=(Double)config.getMin(option);
                 this.max=(Double)config.getMax(option);
                 sliderValue=((Double)value-min)/(max-min);
                 type=Type.DOUBLE;
             }
             else if (value instanceof Float) {
-                this.setMessage(Float.toString((Float)value));
+                this.setMessage(new LiteralText(Float.toString((Float)value)));
                 this.min=(Float)config.getMin(option);
                 this.max=(Float)config.getMax(option);
                 sliderValue=((Float)value-min)/(max-min);
                 type=Type.FLOAT;
             } else {
-                this.setMessage(Integer.toString((Integer)value));
+                this.setMessage(new LiteralText(Integer.toString((Integer)value)));
                 this.min=(Integer)config.getMin(option);
                 this.max=(Integer)config.getMax(option);
                 sliderValue=((Integer)value-min)/(max-min);
@@ -215,19 +217,19 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
             switch (type) {
                 case DOUBLE:
                     double doubleVal=value*(max-min)+min;
-                    this.setMessage(Double.toString(doubleVal));
+                    this.setMessage(new LiteralText(Double.toString(doubleVal)));
                     this.config.setValue(configOption, (Double) doubleVal);
                     handler.onConfigChanging(new OnConfigChangingEvent(modName, configOption, doubleVal));
                     break;
                 case FLOAT:
                     float floatVal=(float) (value*(max-min)+min);
-                    this.setMessage(Float.toString(floatVal));
+                    this.setMessage(new LiteralText(Float.toString(floatVal)));
                     this.config.setValue(configOption, (Float) floatVal);
                     handler.onConfigChanging(new OnConfigChangingEvent(modName, configOption, floatVal));
                     break;
                 case INT:
                     int intVal=(int) (value*(max-min)+min);
-                    this.setMessage(Integer.toString(intVal));
+                    this.setMessage(new LiteralText(Integer.toString(intVal)));
                     this.config.setValue(configOption, (Integer) intVal);
                     handler.onConfigChanging(new OnConfigChangingEvent(modName, configOption, intVal));
                     break;
@@ -235,7 +237,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         }
 
         @Override
-        protected void renderBg(MinecraftClient mc, int mouseX, int mouseY)
+        protected void renderBg(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY)
         {
             if (this.visible)
             {
@@ -247,8 +249,8 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                 }
                 mc.getTextureManager().bindTexture(WIDGETS_LOCATION);
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                this.drawTexture(this.x + (int)(this.sliderValue * (double)(this.width - 8)), this.y, 0, 66, 4, 20);
-                this.drawTexture(this.x + (int)(this.sliderValue * (double)(this.width - 8)) + 4, this.y, 196, 66, 4, 20);
+                this.drawTexture(stack, this.x + (int)(this.sliderValue * (double)(this.width - 8)), this.y, 0, 66, 4, 20);
+                this.drawTexture(stack, this.x + (int)(this.sliderValue * (double)(this.width - 8)) + 4, this.y, 196, 66, 4, 20);
             }
         }
 
@@ -277,14 +279,14 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         public void onFocusedChanged(boolean b) {
             Object value=config.getValue(configOption);
             if (value instanceof Double) {
-                this.setMessage(Double.toString((Double)value));
+                this.setMessage(new LiteralText(Double.toString((Double)value)));
                 sliderValue=((Double)value-min)/(max-min);
             }
             else if (value instanceof Float) {
-                this.setMessage(Float.toString((Float)value));
+                this.setMessage(new LiteralText(Float.toString((Float)value)));
                 sliderValue=((Float)value-min)/(max-min);
             } else {
-                this.setMessage(Integer.toString((Integer)value));
+                this.setMessage(new LiteralText(Integer.toString((Integer)value)));
                 sliderValue=((Integer)value-min)/(max-min);
             }
             super.onFocusedChanged(b);
