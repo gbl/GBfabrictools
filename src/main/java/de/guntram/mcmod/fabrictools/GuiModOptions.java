@@ -139,7 +139,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         
         int y=50;
         for (String text: options) {
-            drawString(stack, textRenderer, text, this.width / 2 -155, y+2, 0xffffff);
+            textRenderer.draw(stack, text, this.width / 2 -155, y+2, 0xffffff);
             y+=LINEHEIGHT;
         }
 
@@ -150,7 +150,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                 if (tooltip==null)
                     tooltip="missing tooltip";
                 if (tooltip.length()<=30) {
-                    renderTextHoverEffect(stack, new LiteralText(handler.getConfig().getTooltip(text)), mouseX, mouseY);
+                    renderTooltip(stack, new LiteralText(handler.getConfig().getTooltip(text)), mouseX, mouseY);
                 } else {
                     List<Text>lines=new ArrayList<>();
                     int pos=0;

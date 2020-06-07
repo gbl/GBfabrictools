@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.2.6-SNAPSHOT'
+	id 'fabric-loom' version '0.2.7-SNAPSHOT'
 }
 
 apply plugin: 'maven'
@@ -8,7 +8,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 ext.Versions = new Properties()
-Versions.load(file("Versionfiles/mcversion-20w17a.properties").newReader())
+Versions.load(file("Versionfiles/mcversion-1.16-pre2.properties").newReader())
 
 archivesBaseName = "GBfabrictools"
 version = "1.2.1.${Versions['minecraft_version']}"
