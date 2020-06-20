@@ -89,6 +89,22 @@ public class Configuration {
         return getValue(description, category, defVal, null, null, toolTip, clazz);
     }
     
+    public int getSelection(String description, int category, int defVal, String[] options, String toolTip) {
+        ConfigurationItem item=items.get(description);
+        if (item==null) {
+            items.put(description, new ConfigurationSelectList(description, toolTip, options, defVal, defVal));
+            wasChanged=true;
+            return defVal;
+        }
+        else if (!(item instanceof ConfigurationSelectList)) {
+            // e.g. we changed the definition from int to list
+            // replace the item with a select list but use the item value
+            ConfigurationSelectList list = new ConfigurationSelectList(description, toolTip, options, item.value, defVal);
+            items.put(description, list);
+        }
+        return (int) getValue(description, category, defVal, 0, options.length-1, toolTip, Integer.class);
+    }
+    
     public Object getValue(String description, int category, Object defVal, Object minVal, Object maxVal, String toolTip, Class clazz) {
         ConfigurationItem item=items.get(description);
         if (item==null) {
@@ -140,6 +156,14 @@ public class Configuration {
     
     public String getTooltip(String description) {
         return items.get(description).toolTip;
+    }
+    
+    public boolean isSelectList(String description) {
+        return items.get(description) instanceof ConfigurationSelectList;
+    }
+    
+    public String[] getListOptions(String description) {
+        return ((ConfigurationSelectList) items.get(description)).options;
     }
     
     /**

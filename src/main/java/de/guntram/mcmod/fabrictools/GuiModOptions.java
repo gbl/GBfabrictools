@@ -66,6 +66,26 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
             if (value == null) {
                 LogManager.getLogger().warn("value null, adding nothing");
                 continue;
+            } else if (handler.getConfig().isSelectList(text)) {
+                String[] options = handler.getConfig().getListOptions(text);
+                element = this.addButton(new AbstractButtonWidget(this.width/2+10, y, 200, BUTTONHEIGHT, new TranslatableText(options[(Integer)value])) {
+                    @Override
+                    public void onClick(double x, double y) {
+                        int cur = (Integer) handler.getConfig().getValue(text);
+                        if (++cur == options.length) {
+                            cur = 0;
+                        }
+                        handler.getConfig().setValue(text, (Integer)cur);
+                        handler.onConfigChanging(new OnConfigChangingEvent(modName, text, cur));
+                        this.changeFocus(true);
+                    }
+                    @Override
+                    public void onFocusedChanged(boolean b) {
+                        int cur = (Integer) handler.getConfig().getValue(text);
+                        this.setMessage(new TranslatableText(options[cur]));
+                        super.onFocusedChanged(b);
+                    }
+                });
             } else if (value instanceof Boolean) {
                 element = this.addButton(new AbstractButtonWidget(this.width/2+10, y, 200, BUTTONHEIGHT, new LiteralText((Boolean) value == true ? "§2true" : "§4false")) {
                     @Override
@@ -90,10 +110,10 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                     @Override
                     public void onFocusedChanged(boolean b) {
                         if (b) {
-                            // LOGGER.info("value to textfield");
+                            LOGGER.info("value to textfield");
                             this.setText((String) handler.getConfig().getValue(text));
                         } else {
-                            // LOGGER.info("textfield to value");
+                            LOGGER.info("textfield to value");
                             handler.getConfig().setValue(text, this.getText());
                         }
                         super.onFocusedChanged(b);
