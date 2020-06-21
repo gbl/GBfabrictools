@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.client.resource.language.I18n;
 
 /**
  *
@@ -114,7 +115,7 @@ public class Configuration {
         }
         
         // Always let code given meta info override config file values
-        item.key=description;
+        item.key=I18n.translate(description);
         item.minValue=minVal;
         item.maxValue=maxVal;
         item.toolTip=toolTip;

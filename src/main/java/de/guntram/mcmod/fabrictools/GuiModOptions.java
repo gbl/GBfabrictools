@@ -2,7 +2,6 @@ package de.guntram.mcmod.fabrictools;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import de.guntram.mcmod.fabrictools.ConfigChangedEvent.OnConfigChangingEvent;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.client.MinecraftClient;
@@ -11,8 +10,10 @@ import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.StringRenderable;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +32,9 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     private static final int BUTTONHEIGHT = 20;
     
     private boolean mouseReleased = false;
+    
+    private static final Text trueText = new TranslatableText("de.guntram.mcmod.fabrictools.true").copy().formatted(Formatting.GREEN);
+    private static final Text falseText = new TranslatableText("de.guntram.mcmod.fabrictools.false").copy().formatted(Formatting.RED);
     
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public GuiModOptions(Screen parent, String modName, ModConfigurationHandler confHandler) {
@@ -89,7 +93,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                     }
                 });
             } else if (value instanceof Boolean) {
-                element = this.addButton(new AbstractButtonWidget(this.width/2+10, y, 200, BUTTONHEIGHT, new LiteralText((Boolean) value == true ? "§2true" : "§4false")) {
+                element = this.addButton(new AbstractButtonWidget(this.width/2+10, y, 200, BUTTONHEIGHT, (Boolean) value == true ? trueText : falseText) {
                     @Override
                     public void onClick(double x, double y) {
                         if ((Boolean)(handler.getConfig().getValue(text))==true) {
@@ -103,7 +107,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                     }
                     @Override
                     public void onFocusedChanged(boolean b) {
-                        this.setMessage(new LiteralText((Boolean) handler.getConfig().getValue(text) == true ? "§2true" : "§4false"));
+                        this.setMessage((Boolean) handler.getConfig().getValue(text) == true ? trueText : falseText);
                         super.onFocusedChanged(b);
                     }
                 });
@@ -161,30 +165,18 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         
         int y=50;
         for (String text: options) {
-            textRenderer.draw(stack, text, this.width / 2 -155, y+2, 0xffffff);
+            textRenderer.draw(stack, new TranslatableText(text), this.width / 2 -155, y+2, 0xffffff);
             y+=LINEHEIGHT;
         }
 
         y=50;
         for (String text: options) {
             if (mouseX>this.width/2-155 && mouseX<this.width/2 && mouseY>y && mouseY<y+BUTTONHEIGHT) {
-                String tooltip=handler.getConfig().getTooltip(text);
-                if (tooltip==null)
-                    tooltip="missing tooltip";
-                if (tooltip.length()<=30) {
-                    renderTooltip(stack, new LiteralText(handler.getConfig().getTooltip(text)), mouseX, mouseY);
+                StringRenderable tooltip=new TranslatableText(handler.getConfig().getTooltip(text));
+                if (textRenderer.getWidth(tooltip)<=250) {
+                    renderTooltip(stack, tooltip, mouseX, mouseY);
                 } else {
-                    List<Text>lines=new ArrayList<>();
-                    int pos=0;
-                    while (pos<tooltip.length()-30) {
-                        int curlen=30;
-                        while (tooltip.charAt(pos+curlen)!=' ' && curlen>10) {
-                            curlen--;
-                        }
-                        lines.add(new LiteralText(tooltip.substring(pos, pos+curlen)));
-                        pos+=curlen+1;
-                    }
-                    lines.add(new LiteralText(tooltip.substring(pos)));
+                    List<StringRenderable> lines = textRenderer.wrapLines(tooltip, 250);
                     renderTooltip(stack, lines, mouseX, mouseY);
                 }
             }
