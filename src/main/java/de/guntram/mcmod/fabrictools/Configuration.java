@@ -173,6 +173,17 @@ public class Configuration {
      */
     public void forget(String item) {
         items.remove(item);
+        wasChanged = true;
+    }
+    
+    public void migrate(String oldKey, String newKey) {
+        ConfigurationItem oldItem = items.get(oldKey);
+        items.remove(oldKey);
+        if (oldItem != null) {
+            oldItem.key = newKey;
+            items.put(newKey, oldItem);
+        }
+        wasChanged = true;
     }
 
     public boolean setValue(String description, Object value) {
