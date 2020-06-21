@@ -30,6 +30,8 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     private static final int LINEHEIGHT = 25;
     private static final int BUTTONHEIGHT = 20;
     
+    private boolean mouseReleased = false;
+    
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public GuiModOptions(Screen parent, String modName, ModConfigurationHandler confHandler) {
         super(new LiteralText(modName));
@@ -194,6 +196,16 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     public Screen get() {
         return this;
     }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (button == 0) {
+            mouseReleased = true;
+        }
+        return super.mouseReleased(mouseX, mouseY, button); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
     
     private enum Type {INT, FLOAT, DOUBLE;}
     
@@ -266,6 +278,11 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                     this.sliderValue = (double)((float)(mouseX - (this.x + 4)) / (float)(this.width - 8));
                     this.sliderValue = MathHelper.clamp(this.sliderValue, 0.0D, 1.0D);
                     updateValue(this.sliderValue);
+                    if (mouseReleased) {
+                        this.dragging = false;
+                        mouseReleased = false;
+                    }
+                            
                 }
                 mc.getTextureManager().bindTexture(WIDGETS_LOCATION);
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -284,6 +301,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
             this.sliderValue = MathHelper.clamp(this.sliderValue, 0.0D, 1.0D);
             updateValue(sliderValue);
             this.dragging = true;
+            mouseReleased = false;
         }
 
         /**
