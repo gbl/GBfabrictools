@@ -4,13 +4,13 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import de.guntram.mcmod.fabrictools.ConfigChangedEvent.OnConfigChangingEvent;
 import java.util.List;
 import java.util.function.Supplier;
+import net.minecraft.class_5481;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.StringRenderable;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
@@ -33,8 +33,8 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     
     private boolean mouseReleased = false;
     
-    private static final Text trueText = new TranslatableText("de.guntram.mcmod.fabrictools.true").copy().formatted(Formatting.GREEN);
-    private static final Text falseText = new TranslatableText("de.guntram.mcmod.fabrictools.false").copy().formatted(Formatting.RED);
+    private static final Text trueText = new TranslatableText("de.guntram.mcmod.fabrictools.true").formatted(Formatting.GREEN);
+    private static final Text falseText = new TranslatableText("de.guntram.mcmod.fabrictools.false").formatted(Formatting.RED);
     
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public GuiModOptions(Screen parent, String modName, ModConfigurationHandler confHandler) {
@@ -165,18 +165,18 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         
         int y=50;
         for (String text: options) {
-            textRenderer.draw(stack, new TranslatableText(text), this.width / 2 -155, y+2, 0xffffff);
+            textRenderer.draw(stack, new TranslatableText(text).method_30937(), this.width / 2 -155, y+2, 0xffffff);
             y+=LINEHEIGHT;
         }
 
         y=50;
         for (String text: options) {
             if (mouseX>this.width/2-155 && mouseX<this.width/2 && mouseY>y && mouseY<y+BUTTONHEIGHT) {
-                StringRenderable tooltip=new TranslatableText(handler.getConfig().getTooltip(text));
+                TranslatableText tooltip=new TranslatableText(handler.getConfig().getTooltip(text));
                 if (textRenderer.getWidth(tooltip)<=250) {
                     renderTooltip(stack, tooltip, mouseX, mouseY);
                 } else {
-                    List<StringRenderable> lines = textRenderer.wrapLines(tooltip, 250);
+                    List<class_5481> lines = textRenderer.wrapLines(tooltip, 250);
                     renderTooltip(stack, lines, mouseX, mouseY);
                 }
             }

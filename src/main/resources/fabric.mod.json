@@ -7,7 +7,6 @@
         "client": [ "de.guntram.mcmod.fabrictools.DummyMain" ]
     },
     "custom": {
-        "modmenu:clientsideOnly": true,
         "modmenu:api": true
     },
     "mixins": [
