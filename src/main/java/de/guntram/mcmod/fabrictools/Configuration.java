@@ -7,6 +7,7 @@ package de.guntram.mcmod.fabrictools;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import java.io.File;
@@ -45,6 +46,9 @@ public class Configuration {
             // do nothing, probably first time starting
         } catch (IOException ex) {
             System.err.println("Trying to load config file "+configFile.getAbsolutePath()+":");
+            ex.printStackTrace(System.err);
+        } catch (JsonSyntaxException ex) {
+            System.err.println("Syntax error in config file "+configFile.getAbsolutePath()+" - using defaults");
             ex.printStackTrace(System.err);
         }
         wasChanged=false;

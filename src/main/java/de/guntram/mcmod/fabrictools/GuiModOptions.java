@@ -4,13 +4,13 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import de.guntram.mcmod.fabrictools.ConfigChangedEvent.OnConfigChangingEvent;
 import java.util.List;
 import java.util.function.Supplier;
-import net.minecraft.class_5481;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
@@ -165,7 +165,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         
         int y=50;
         for (String text: options) {
-            textRenderer.draw(stack, new TranslatableText(text).method_30937(), this.width / 2 -155, y+2, 0xffffff);
+            textRenderer.draw(stack, new TranslatableText(text).asOrderedText(), this.width / 2 -155, y+2, 0xffffff);
             y+=LINEHEIGHT;
         }
 
@@ -176,8 +176,8 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                 if (textRenderer.getWidth(tooltip)<=250) {
                     renderTooltip(stack, tooltip, mouseX, mouseY);
                 } else {
-                    List<class_5481> lines = textRenderer.wrapLines(tooltip, 250);
-                    renderTooltip(stack, lines, mouseX, mouseY);
+                    List<OrderedText> lines = textRenderer.wrapLines(tooltip, 250);
+                    renderOrderedTooltip(stack, lines, mouseX, mouseY);
                 }
             }
             y+=LINEHEIGHT;
