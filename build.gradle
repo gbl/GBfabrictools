@@ -15,7 +15,7 @@ archivesBaseName = "GBfabrictools"
 // No, we don't want that in this case, as we want to be able to develop a new
 // version while leaving all current mods on the old version.
 // version = "${Versions['gbfabrictools_version']}"
-version = "1.2.2+${Versions['minecraft_version']}"
+version = "1.2.3+${Versions['minecraft_version']}"
 
 minecraft {
 	refmapName = "de-guntram-mcmod-fabrictools-refmap.json";
