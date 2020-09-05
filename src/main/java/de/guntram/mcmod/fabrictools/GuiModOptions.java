@@ -38,10 +38,6 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     
     private static final int LINEHEIGHT = 25;
     private static final int BUTTONHEIGHT = 20;
-    
-    //private static final Text trueText = new TranslatableText("de.guntram.mcmod.fabrictools.true").copy().formatted(Formatting.GREEN);
-    // private static final Text falseText = new TranslatableText("de.guntram.mcmod.fabrictools.false").copy().formatted(Formatting.RED);
-
     private static final int TOP_BAR_SIZE = 40;
     private static final int BOTTOM_BAR_SIZE = 35;
 
@@ -223,39 +219,31 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         renderBackground(stack);
-/*
-        drawCenteredString(stack, textRenderer, screenTitle, this.width/2, BUTTONHEIGHT, 0xffffff);
-        super.render(stack, mouseX, mouseY, partialTicks);
-        
-        int y=50;
-        for (String text: options) {
-            textRenderer.draw(stack, new TranslatableText(text), this.width / 2 -155, y+2, 0xffffff);
-            y+=LINEHEIGHT;
-        }
-*/
 
         if (!colorSelector.visible) {
             int y = TOP_BAR_SIZE + LINEHEIGHT/2 - scrollAmount;
-            for (int i=1; i<this.buttons.size(); i+=2) {
+            for (int i=0; i<this.options.size(); i++) {
                 if (y > TOP_BAR_SIZE - LINEHEIGHT/2 && y < height - BOTTOM_BAR_SIZE) {
-                    textRenderer.draw(stack, new TranslatableText(options.get(i/2)), this.width / 2 -155, y+4, 0xffffff);
-                    ((AbstractButtonWidget)this.buttons.get(i)).y = y;                                          // config elem
-                    ((AbstractButtonWidget)this.buttons.get(i)).render(stack, mouseX, mouseY, partialTicks);
-                    ((AbstractButtonWidget)this.buttons.get(i+1)).y = y;                                        // reset button
-                    ((AbstractButtonWidget)this.buttons.get(i+1)).render(stack, mouseX, mouseY, partialTicks);
+                    textRenderer.draw(stack, new TranslatableText(options.get(i)), this.width / 2 -155, y+4, 0xffffff);
+                    ((AbstractButtonWidget)this.buttons.get(i*2+1)).y = y;                                          // config elem
+                    ((AbstractButtonWidget)this.buttons.get(i*2+1)).render(stack, mouseX, mouseY, partialTicks);
+                    ((AbstractButtonWidget)this.buttons.get(i*2+2)).y = y;                                        // reset button
+                    ((AbstractButtonWidget)this.buttons.get(i*2+2)).render(stack, mouseX, mouseY, partialTicks);
                 }
                 y += LINEHEIGHT;
             }
 
-            y = TOP_BAR_SIZE - scrollAmount;
+            y = TOP_BAR_SIZE + LINEHEIGHT/2 - scrollAmount;
             for (String text: options) {
-                if (mouseX>this.width/2-155 && mouseX<this.width/2 && mouseY>y && mouseY<y+BUTTONHEIGHT) {
-                    StringRenderable tooltip=new TranslatableText(handler.getConfig().getTooltip(text));
-                    if (textRenderer.getWidth(tooltip)<=250) {
-                        renderTooltip(stack, tooltip, 0, mouseY);
-                    } else {
-                        List<StringRenderable> lines = textRenderer.wrapLines(tooltip, 250);
-                        renderTooltip(stack, lines, mouseX, mouseY);
+                if (y > TOP_BAR_SIZE - LINEHEIGHT/2 && y < height - BOTTOM_BAR_SIZE) {
+                    if (mouseX>this.width/2-155 && mouseX<this.width/2 && mouseY>y && mouseY<y+BUTTONHEIGHT) {
+                        TranslatableText tooltip=new TranslatableText(handler.getConfig().getTooltip(text));
+                        if (textRenderer.getWidth(tooltip)<=250) {
+                            renderTooltip(stack, tooltip, 0, mouseY);
+                        } else {
+                            List<StringRenderable> lines = textRenderer.wrapLines(tooltip, 250);
+                            renderTooltip(stack, lines, 0, mouseY);
+                        }
                     }
                 }
                 y+=LINEHEIGHT;
