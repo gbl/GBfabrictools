@@ -1,21 +1,19 @@
 package de.guntram.mcmod.fabrictools;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import de.guntram.mcmod.fabrictools.ConfigChangedEvent.OnConfigChangingEvent;
+import de.guntram.mcmod.fabrictools.GuiElements.ColorPicker;
+import de.guntram.mcmod.fabrictools.GuiElements.ColorSelector;
+import de.guntram.mcmod.fabrictools.GuiElements.GuiSlider;
 import de.guntram.mcmod.fabrictools.Types.ConfigurationMinecraftColor;
 import de.guntram.mcmod.fabrictools.Types.ConfigurationTrueColor;
 import java.util.List;
 import java.util.function.Supplier;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import static net.minecraft.client.gui.widget.AbstractButtonWidget.WIDGETS_LOCATION;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
@@ -25,10 +23,8 @@ import net.minecraft.text.TextColor;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Matrix4f;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL11;
 
 public class GuiModOptions extends Screen implements Supplier<Screen> {
     
@@ -45,8 +41,8 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     private static final int TOP_BAR_SIZE = 40;
     private static final int BOTTOM_BAR_SIZE = 35;
 
-    private boolean mouseReleased = false;          // used in sliders
     private boolean isDraggingScrollbar = false;
+    private boolean mouseReleased = false;      // used to capture mouse release events when a child slider has the mouse dragging
 
     private int buttonWidth;
     private int scrollAmount;
@@ -67,7 +63,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         this.screenTitle=modName+" Configuration";
         this.options=handler.getConfig().getKeys();
         this.LOGGER=LogManager.getLogger();
-        this.colorSelector = new ColorSelector(new LiteralText("Color"));
+        this.colorSelector = new ColorSelector(this, new LiteralText("Color"));
     }
     
     @Override
@@ -112,8 +108,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                         if (++cur == options.length) {
                             cur = 0;
                         }
-                        handler.getConfig().setValue(option, (Integer)cur);
-                        handler.onConfigChanging(new OnConfigChangingEvent(modName, option, cur));
+                        onConfigChanging(option, cur);
                         this.changeFocus(true);
                     }
                     @Override
@@ -128,11 +123,9 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                     @Override
                     public void onClick(double x, double y) {
                         if ((Boolean)(handler.getConfig().getValue(option))==true) {
-                            handler.getConfig().setValue(option, false);
-                            handler.onConfigChanging(new OnConfigChangingEvent(modName, option, false));
+                            onConfigChanging(option, false);
                         } else {
-                            handler.getConfig().setValue(option, true);
-                            handler.onConfigChanging(new OnConfigChangingEvent(modName, option, true));
+                            onConfigChanging(option, true);
                         }
                         this.changeFocus(true);
                     }
@@ -179,35 +172,35 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                     handler.getConfig().setValue(option, new ConfigurationMinecraftColor((Integer)value));
                 }
                 element=this.addButton(new AbstractButtonWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, null) {
-                            @Override
-                            public void onClick(double x, double y) {
-                                enableColorSelector(option, this);
-                            }
-                            @Override
-                            public void setMessage(Text ignored) {
-                                Object o = handler.getConfig().getValue(option);
-                                int newIndex = ((ConfigurationMinecraftColor)o).colorIndex;
-                                super.setMessage(new TranslatableText("de.guntram.mcmod.fabrictools.color").formatted(Formatting.byColorIndex(newIndex)));
-                            }
+                    @Override
+                    public void onClick(double x, double y) {
+                        enableColorSelector(option, this);
+                    }
+                    @Override
+                    public void setMessage(Text ignored) {
+                        Object o = handler.getConfig().getValue(option);
+                        int newIndex = ((ConfigurationMinecraftColor)o).colorIndex;
+                        super.setMessage(new TranslatableText("de.guntram.mcmod.fabrictools.color").formatted(Formatting.byColorIndex(newIndex)));
+                    }
                 });
                 element.setMessage(null);
             } else if (value instanceof ConfigurationTrueColor
                     || value instanceof Integer && (Integer) handler.getConfig().getMin(option) == 0 && (Integer) handler.getConfig().getMax(option) == 0xffffff) {
                 element=this.addButton(new AbstractButtonWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, null) {
-                            @Override
-                            public void onClick(double x, double y) {
-                                enableColorPicker(option, this);
-                            }
-                            @Override
-                            public void setMessage(Text ignored) {
-                                Object o = handler.getConfig().getValue(option);
-                                int rgb = ((ConfigurationTrueColor)o).getInt();
-                                super.setMessage(new TranslatableText("de.guntram.mcmod.fabrictools.color").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb))));
-                            }
+                    @Override
+                    public void onClick(double x, double y) {
+                        enableColorPicker(option, this);
+                    }
+                    @Override
+                    public void setMessage(Text ignored) {
+                        Object o = handler.getConfig().getValue(option);
+                        int rgb = ((ConfigurationTrueColor)o).getInt();
+                        super.setMessage(new TranslatableText("de.guntram.mcmod.fabrictools.color").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb))));
+                    }
                 });
                 element.setMessage(null);
             } else if (value instanceof Integer || value instanceof Float || value instanceof Double) {
-                element=this.addButton(new GuiSlider(this.width/2+10, y, handler.getConfig(), option));
+                element=this.addButton(new GuiSlider(this, this.width/2+10, y, this.buttonWidth, BUTTONHEIGHT, handler.getConfig(), option));
             } else {
                 LogManager.getLogger().warn(modName +" has option "+option+" with data type "+value.getClass().getName());
                 continue;
@@ -215,8 +208,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
             this.addButton(new AbstractButtonWidget(this.width/2+10+buttonWidth+10, y, BUTTONHEIGHT, BUTTONHEIGHT, new LiteralText("")) {
                 @Override
                 public void onClick(double x, double y) {
-                    handler.getConfig().setValue(option, handler.getConfig().getDefault(option));
-                    handler.onConfigChanging(new OnConfigChangingEvent(modName, option, handler.getConfig().getDefault(option)));
+                    onConfigChanging(option, handler.getConfig().getDefault(option));
                     element.changeFocus(false);
                 }
             });
@@ -347,7 +339,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         colorPicker.setLink(option, element);
     }
     
-    private void disableColorSelectorAndPicker() {
+    public void subscreenFinished() {
         for (int i=1; i<buttons.size(); i++) {
             buttons.get(i).visible = true;
         }
@@ -355,268 +347,18 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         colorPicker.visible = false;
     }
     
-    private enum Type {INT, FLOAT, DOUBLE;}
-    
-    private class GuiSlider extends AbstractButtonWidget {
-        Type type;
-        boolean dragging;
-        double sliderValue, min, max;
-        Configuration config;
-        String configOption;
-        
-        @SuppressWarnings("OverridableMethodCallInConstructor")
-        GuiSlider(int x, int y, Configuration config, String option) {
-            super(x, y, buttonWidth, BUTTONHEIGHT, new LiteralText("?"));
-            Object value=config.getValue(option);
-            if (value instanceof Double) {
-                this.setMessage(new LiteralText(Double.toString((Double)value)));
-                this.min=(Double)config.getMin(option);
-                this.max=(Double)config.getMax(option);
-                sliderValue=((Double)value-min)/(max-min);
-                type=Type.DOUBLE;
-            }
-            else if (value instanceof Float) {
-                this.setMessage(new LiteralText(Float.toString((Float)value)));
-                this.min=(Float)config.getMin(option);
-                this.max=(Float)config.getMax(option);
-                sliderValue=((Float)value-min)/(max-min);
-                type=Type.FLOAT;
-            } else {
-                this.setMessage(new LiteralText(Integer.toString((Integer)value)));
-                this.min=(Integer)config.getMin(option);
-                this.max=(Integer)config.getMax(option);
-                sliderValue=((Integer)value-min)/(max-min);
-                type=Type.INT;
-            }
-
-            this.config=config;
-            this.configOption=option;
-        }
-        
-        private void updateValue(double value) {
-            switch (type) {
-                case DOUBLE:
-                    double doubleVal=value*(max-min)+min;
-                    this.setMessage(new LiteralText(Double.toString(doubleVal)));
-                    this.config.setValue(configOption, (Double) doubleVal);
-                    handler.onConfigChanging(new OnConfigChangingEvent(modName, configOption, doubleVal));
-                    break;
-                case FLOAT:
-                    float floatVal=(float) (value*(max-min)+min);
-                    this.setMessage(new LiteralText(Float.toString(floatVal)));
-                    this.config.setValue(configOption, (Float) floatVal);
-                    handler.onConfigChanging(new OnConfigChangingEvent(modName, configOption, floatVal));
-                    break;
-                case INT:
-                    int intVal=(int) (value*(max-min)+min);
-                    this.setMessage(new LiteralText(Integer.toString(intVal)));
-                    this.config.setValue(configOption, (Integer) intVal);
-                    handler.onConfigChanging(new OnConfigChangingEvent(modName, configOption, intVal));
-                    break;
-            }
-        }
-
-        @Override
-        protected void renderBg(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY)
-        {
-            if (this.visible)
-            {
-                if (this.dragging)
-                {
-                    this.sliderValue = (double)((float)(mouseX - (this.x + 4)) / (float)(this.width - 8));
-                    this.sliderValue = MathHelper.clamp(this.sliderValue, 0.0D, 1.0D);
-                    updateValue(this.sliderValue);
-                    if (mouseReleased) {
-                        this.dragging = false;
-                        mouseReleased = false;
-                    }
-                            
-                }
-                mc.getTextureManager().bindTexture(WIDGETS_LOCATION);
-                GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                this.drawTexture(stack, this.x + (int)(this.sliderValue * (double)(this.width - 8)), this.y, 0, 66, 4, 20);
-                this.drawTexture(stack, this.x + (int)(this.sliderValue * (double)(this.width - 8)) + 4, this.y, 196, 66, 4, 20);
-            }
-        }
-
-        /**
-         * Called when the left mouse button is pressed over this button. This method is specific to AbstractButtonWidget.
-         */
-        @Override
-        public final void onClick(double mouseX, double mouseY)
-        {
-            this.sliderValue = (mouseX - (double)(this.x + 4)) / (double)(this.width - 8);
-            this.sliderValue = MathHelper.clamp(this.sliderValue, 0.0D, 1.0D);
-            updateValue(sliderValue);
-            this.dragging = true;
-            mouseReleased = false;
-        }
-
-        /**
-         * Called when the left mouse button is released. This method is specific to AbstractButtonWidget.
-         */
-        @Override
-        public void onRelease(double mouseX, double mouseY)
-        {
-            this.dragging = false;
-        }
-        
-        @Override
-        public void onFocusedChanged(boolean b) {
-            Object value=config.getValue(configOption);
-            if (value instanceof Double) {
-                this.setMessage(new LiteralText(Double.toString((Double)value)));
-                sliderValue=((Double)value-min)/(max-min);
-            }
-            else if (value instanceof Float) {
-                this.setMessage(new LiteralText(Float.toString((Float)value)));
-                sliderValue=((Float)value-min)/(max-min);
-            } else {
-                this.setMessage(new LiteralText(Integer.toString((Integer)value)));
-                sliderValue=((Integer)value-min)/(max-min);
-            }
-            super.onFocusedChanged(b);
-        }
+    public boolean wasMouseReleased() {
+        boolean result = mouseReleased;
+        mouseReleased = false;
+        return result;
     }
     
-    private class ColorSelector extends AbstractButtonWidget {
-        
-        private ColorButton buttons[];
-        private ConfigurationMinecraftColor currentColor;
-        private String option;
-        private AbstractButtonWidget element;
-
-        private int standardColors[] = { 
-            0x000000, 0x0000AA, 0x00AA00, 0x00AAAA,
-            0xAA0000, 0xAA00AA, 0xFFAA00, 0xAAAAAA, 
-            0x555555, 0x5555FF, 0x55FF55, 0x55FFFF,
-            0xFF5555, 0xFF55FF, 0xFFFF55, 0xFFFFFF
-        };
-
-        public ColorSelector(Text message) {
-            super(0, 0, 120, 120, message);
-            buttons = new ColorButton[16];
-        }
-        
-        public void init() {
-            Text buttonText = new LiteralText("");
-            this.x = (GuiModOptions.this.width - width) / 2;
-            this.y = (GuiModOptions.this.height - height) / 2;
-            for (int i=0; i<16; i++) {
-                buttons[i]=new ColorButton(
-                    this, x + (i/4) * 25, y + (i%4)*25, 20, 20, buttonText, i, standardColors[i]
-                );
-            }
-            visible = false;
-        }
-        
-        @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (visible) {
-                for (int i=0; i<buttons.length; i++) {
-                    if (buttons[i].mouseClicked(mouseX, mouseY, button))
-                        return true;
-                }
-            }
-            return false;
-        }
-        
-        @Override
-        public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-            if (visible) {
-                // renderButton(stack, mouseX, mouseY, partialTicks);
-                for (int i=0; i<16; i++) {
-                    buttons[i].render(stack, mouseX, mouseY, partialTicks);
-                }
-            }
-        }
-        
-        public void setLink(String option, AbstractButtonWidget element) {
-            this.option = option;
-            this.element = element;
-        }
-        
-        public void setCurrentColor(ConfigurationMinecraftColor color) {
-            currentColor = color;
-        }
-        
-        public ConfigurationMinecraftColor getCurrentColor() {
-            return currentColor;
-        }
-        
-        public void onColorSelected(int color) {
-            currentColor.colorIndex = color;
-            handler.onConfigChanging(new OnConfigChangingEvent(modName, option, currentColor));
-            System.out.println("set "+option+" to "+color);
-            handler.getConfig().setValue(option, currentColor);
-            element.setMessage(null);
-            disableColorSelectorAndPicker();
-        }
+    public void setMouseReleased(boolean value) {
+        mouseReleased = value;
     }
     
-    private class ColorButton extends AbstractButtonWidget {
-        
-        private final ColorSelector parent;
-        private final int index;
-        private final int color;
-
-        public ColorButton(ColorSelector parent, int x, int y, int width, int height, Text message, int index, int color) {
-            super(x, y, width, height, message);
-            this.index = index;
-            this.color = color;
-            this.parent = parent;
-        }
-        
-        @Override
-        protected void renderBg(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY) {
-            if (this.visible) {
-                super.renderBg(stack, client, mouseX, mouseY);
-
-                final Tessellator tessellator = Tessellator.getInstance();
-                final BufferBuilder bufferBuilder = tessellator.getBuffer();
-                float red = ((color >> 16)/255.0f);
-                float green = (((color >> 8) & 0xff)/255.0f);
-                float blue = (((color >> 0) & 0xff) /255.0f);
-                
-                GlStateManager.disableTexture();
-
-                bufferBuilder.begin(GL11.GL_TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-                Matrix4f model = stack.peek().getModel();
-                int x1=this.x+3;
-                int x2=this.x+this.width-3;
-                int y1=this.y+3;
-                int y2=this.y+this.height-3;
-                if (index == parent.getCurrentColor().colorIndex) {
-                    bufferBuilder.vertex(model, x1, y1, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
-                    bufferBuilder.vertex(model, x1, y2, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
-                    bufferBuilder.vertex(model, x2, y2, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
-                    bufferBuilder.vertex(model, x2, y1, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
-                    tessellator.draw();
-                    bufferBuilder.begin(GL11.GL_TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-                    x1++; y1++; x2--; y2--;
-                }
-                bufferBuilder.vertex(model, x1, y1, 0.0f).color(red, green, blue, 1.0f).next();
-                bufferBuilder.vertex(model, x1, y2, 0.0f).color(red, green, blue, 1.0f).next();
-                bufferBuilder.vertex(model, x2, y2, 0.0f).color(red, green, blue, 1.0f).next();
-                bufferBuilder.vertex(model, x2, y1, 0.0f).color(red, green, blue, 1.0f).next();
-                tessellator.draw();
-
-                GlStateManager.enableTexture();
-            }
-        }
-        
-        @Override
-        public void onClick(double mouseX, double mouseY) {
-            // System.out.println("selected "+Integer.toHexString(color)+" from button "+this.index);
-            parent.onColorSelected(this.index);
-        }
-    }
-    
-    private class ColorPicker extends AbstractButtonWidget {
-        
-        public ColorPicker(int x, int y, int width, int height, Text message) {
-            super(x, y, width, height, message);
-        }
-        
+    public void onConfigChanging(String option, Object value) {
+        handler.getConfig().setValue(option, value);
+        handler.onConfigChanging(new ConfigChangedEvent.OnConfigChangingEvent(modName, option, value));
     }
 }
