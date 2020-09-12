@@ -1,14 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package de.guntram.mcmod.fabrictools;
+package de.guntram.mcmod.fabrictools.Types;
 
-/**
- *
- * @author gbl
- */
+import de.guntram.mcmod.fabrictools.ConfigurationItem;
+
 public class ConfigurationSelectList extends ConfigurationItem {
     
     final String[] options;
@@ -16,5 +9,9 @@ public class ConfigurationSelectList extends ConfigurationItem {
     public ConfigurationSelectList(String key, String toolTip, String[] options, Object value, Object defaultValue) {
         super(key, toolTip, value, defaultValue);
         this.options = options;
+    }
+    
+    public String[] getOptions() {
+        return options;
     }
 }

@@ -10,6 +10,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import de.guntram.mcmod.fabrictools.Types.ConfigurationMinecraftColor;
+import de.guntram.mcmod.fabrictools.Types.ConfigurationSelectList;
+import de.guntram.mcmod.fabrictools.Types.ConfigurationTrueColor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -90,8 +93,12 @@ public class Configuration {
         return (String) getValue(description, category, defVal, toolTip, String.class);
     }
     
-    public Object getValue(String description, int category, Object defVal, String toolTip, Class clazz) {
-        return getValue(description, category, defVal, null, null, toolTip, clazz);
+    public int getIndexedColor(String description, int category, int defIndex, String toolTip) {
+        return (int) getValue(description, category, defIndex, 0, 15, toolTip, ConfigurationMinecraftColor.class);
+    }
+
+    public int getTrueColor(String description, int category, int defIndex, String toolTip) {
+        return (int) getValue(description, category, defIndex, 0, 0xffffff, toolTip, ConfigurationTrueColor.class);
     }
     
     public int getSelection(String description, int category, int defVal, String[] options, String toolTip) {
@@ -108,6 +115,10 @@ public class Configuration {
             items.put(description, list);
         }
         return (int) getValue(description, category, defVal, 0, options.length-1, toolTip, Integer.class);
+    }
+
+    public Object getValue(String description, int category, Object defVal, String toolTip, Class clazz) {
+        return getValue(description, category, defVal, null, null, toolTip, clazz);
     }
     
     public Object getValue(String description, int category, Object defVal, Object minVal, Object maxVal, String toolTip, Class clazz) {
@@ -137,6 +148,21 @@ public class Configuration {
             float value=(float)(double)(Double) item.value;
             item.value = (Float) value;
             return item.value;
+        } else if (item.value.getClass() == Integer.class && clazz == ConfigurationMinecraftColor.class) {
+            int result = (Integer) item.value;
+            item.value = new ConfigurationMinecraftColor(result);
+            return result;
+        } else if (clazz == ConfigurationMinecraftColor.class) {
+            int  result = ((ConfigurationMinecraftColor)item.value).colorIndex;
+            return result;
+        } else if (item.value.getClass() == Integer.class && clazz == ConfigurationTrueColor.class) {
+            int result = (Integer) item.value;
+            item.value = new ConfigurationTrueColor(result);
+            return result;
+        } else if (clazz == ConfigurationTrueColor.class) {
+            ConfigurationTrueColor tC = ((ConfigurationTrueColor)item.value);
+            Integer result = tC.red << 16 | tC.green << 8 | tC.blue << 0;
+            return result;
         }
         item.value=defVal;
         wasChanged=true;
@@ -168,7 +194,7 @@ public class Configuration {
     }
     
     public String[] getListOptions(String description) {
-        return ((ConfigurationSelectList) items.get(description)).options;
+        return ((ConfigurationSelectList) items.get(description)).getOptions();
     }
     
     /**
