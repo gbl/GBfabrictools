@@ -7,8 +7,10 @@ import de.guntram.mcmod.fabrictools.GuiElements.ColorSelector;
 import de.guntram.mcmod.fabrictools.GuiElements.GuiSlider;
 import de.guntram.mcmod.fabrictools.Types.ConfigurationMinecraftColor;
 import de.guntram.mcmod.fabrictools.Types.ConfigurationTrueColor;
+import de.guntram.mcmod.fabrictools.Types.SliderValueConsumer;
 import java.util.List;
 import java.util.function.Supplier;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
@@ -26,7 +28,7 @@ import net.minecraft.util.math.MathHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class GuiModOptions extends Screen implements Supplier<Screen> {
+public class GuiModOptions extends Screen implements Supplier<Screen>, SliderValueConsumer {
     
     private final Screen parent;
     private final String modName;
@@ -63,7 +65,8 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         this.screenTitle=modName+" Configuration";
         this.options=handler.getConfig().getKeys();
         this.LOGGER=LogManager.getLogger();
-        this.colorSelector = new ColorSelector(this, new LiteralText("Color"));
+        this.colorSelector = new ColorSelector(this, new LiteralText("Minecraft Color"));
+        this.colorPicker = new ColorPicker(this, 0xffffff, new LiteralText("RGB Color"));
     }
     
     @Override
@@ -79,6 +82,15 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         this.addButton(new AbstractButtonWidget(this.width / 2 - 100, this.height - 27, 200, BUTTONHEIGHT, new TranslatableText("gui.done")) {
             @Override
             public void onClick(double x, double y) {
+                
+                if (colorSelector.visible) {
+                    subscreenFinished();
+                    return;
+                } else if (colorPicker.visible) {
+                    colorPicker.onDoneButton();
+                    return;
+                }
+                
                 for (AbstractButtonWidget button: buttons) {
                     if (button instanceof TextFieldWidget) {
                         if (button.isFocused()) {
@@ -167,7 +179,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                 element.changeFocus(false);
             } else if (value instanceof ConfigurationMinecraftColor
                    ||  value instanceof Integer && (Integer) handler.getConfig().getMin(option) == 0 && (Integer) handler.getConfig().getMax(option) == 15) {
-                // ok, this is quite hacky; assume selections from 0..15 are color indexes ...
+                // upgrade int 0..15 from older mods to color
                 if (value instanceof Integer) {
                     handler.getConfig().setValue(option, new ConfigurationMinecraftColor((Integer)value));
                 }
@@ -182,10 +194,15 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                         int newIndex = ((ConfigurationMinecraftColor)o).colorIndex;
                         super.setMessage(new TranslatableText("de.guntram.mcmod.fabrictools.color").formatted(Formatting.byColorIndex(newIndex)));
                     }
+                    @Override
+                    public boolean changeFocus(boolean ignored) { setMessage(null); return ignored; }
                 });
                 element.setMessage(null);
             } else if (value instanceof ConfigurationTrueColor
                     || value instanceof Integer && (Integer) handler.getConfig().getMin(option) == 0 && (Integer) handler.getConfig().getMax(option) == 0xffffff) {
+                if (value instanceof Integer) {
+                    handler.getConfig().setValue(option, new ConfigurationTrueColor((Integer)value));
+                }
                 element=this.addButton(new AbstractButtonWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, null) {
                     @Override
                     public void onClick(double x, double y) {
@@ -197,6 +214,8 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                         int rgb = ((ConfigurationTrueColor)o).getInt();
                         super.setMessage(new TranslatableText("de.guntram.mcmod.fabrictools.color").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb))));
                     }
+                    @Override
+                    public boolean changeFocus(boolean ignored) { setMessage(null); return ignored; }
                 });
                 element.setMessage(null);
             } else if (value instanceof Integer || value instanceof Float || value instanceof Double) {
@@ -208,7 +227,14 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
             this.addButton(new AbstractButtonWidget(this.width/2+10+buttonWidth+10, y, BUTTONHEIGHT, BUTTONHEIGHT, new LiteralText("")) {
                 @Override
                 public void onClick(double x, double y) {
-                    onConfigChanging(option, handler.getConfig().getDefault(option));
+                    Object value = handler.getConfig().getValue(option);
+                    Object defValue = handler.getConfig().getDefault(option);
+                    if (value instanceof ConfigurationMinecraftColor) {
+                        defValue = new ConfigurationMinecraftColor((int) defValue);
+                    } else if (value instanceof ConfigurationTrueColor) {
+                        defValue = new ConfigurationTrueColor((int) defValue);
+                    }
+                    onConfigChanging(option, defValue);
                     element.changeFocus(false);
                 }
             });
@@ -219,7 +245,9 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         }
         
         colorSelector.init();
+        colorPicker.init();
         this.addButton(colorSelector);
+        this.addButton(colorPicker);
     }
     
     @Override
@@ -238,7 +266,11 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         renderBackground(stack);
 
-        if (!colorSelector.visible) {
+        if (colorSelector.visible) {
+            colorSelector.render(stack, mouseX, mouseY, partialTicks);
+        } else if (colorPicker.visible) {
+            colorPicker.render(stack, mouseX, mouseY, partialTicks);
+        } else {
             int y = TOP_BAR_SIZE + LINEHEIGHT/2 - scrollAmount;
             for (int i=0; i<this.options.size(); i++) {
                 if (y > TOP_BAR_SIZE - LINEHEIGHT/2 && y < height - BOTTOM_BAR_SIZE) {
@@ -274,8 +306,6 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
                 this.client.getTextureManager().bindTexture(WIDGETS_LOCATION);
                 drawTexture(stack, width-5, pos+TOP_BAR_SIZE, 0, 66, 4, 20);
             }
-        } else {
-            colorSelector.render(stack, mouseX, mouseY, partialTicks);
         }
         this.client.getTextureManager().bindTexture(DrawableHelper.BACKGROUND_TEXTURE);
         RenderSystem.disableDepthTest();
@@ -334,7 +364,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         for (int i=1; i<buttons.size(); i++) {
             buttons.get(i).visible = false;
         }
-        colorPicker.setCurrentColor((ConfigurationMinecraftColor) handler.getConfig().getValue(option));
+        colorPicker.setCurrentColor((ConfigurationTrueColor) handler.getConfig().getValue(option));
         colorPicker.visible = true;
         colorPicker.setLink(option, element);
     }
@@ -347,18 +377,30 @@ public class GuiModOptions extends Screen implements Supplier<Screen> {
         colorPicker.visible = false;
     }
     
+    @Override
     public boolean wasMouseReleased() {
         boolean result = mouseReleased;
         mouseReleased = false;
         return result;
     }
     
+    @Override
     public void setMouseReleased(boolean value) {
         mouseReleased = value;
     }
     
+    @Override
     public void onConfigChanging(String option, Object value) {
         handler.getConfig().setValue(option, value);
+        if (value instanceof ConfigurationMinecraftColor) {
+            value = ((ConfigurationMinecraftColor)value).colorIndex;
+        } else if (value instanceof ConfigurationTrueColor) {
+            value = ((ConfigurationTrueColor)value).getInt();
+        }
         handler.onConfigChanging(new ConfigChangedEvent.OnConfigChangingEvent(modName, option, value));
+    }
+    
+    public TextRenderer getTextRenderer() {
+        return textRenderer;
     }
 }

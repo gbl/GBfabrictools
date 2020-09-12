@@ -2,7 +2,8 @@ package de.guntram.mcmod.fabrictools.GuiElements;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import de.guntram.mcmod.fabrictools.GuiModOptions;
-import de.guntram.mcmod.fabrictools.Types.ConfigurationMinecraftColor;
+import de.guntram.mcmod.fabrictools.Types.ConfigurationTrueColor;
+import de.guntram.mcmod.fabrictools.Types.SliderValueConsumer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.render.BufferBuilder;
@@ -15,44 +16,41 @@ import net.minecraft.util.math.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
 
-public class ColorPicker extends AbstractButtonWidget {
+public class ColorPicker extends AbstractButtonWidget implements SliderValueConsumer {
 
-    private ColorButton buttons[];
-    private ConfigurationMinecraftColor currentColor;
+    private ColorDisplayAreaButton colorDisplay;
+    private GuiSlider redSlider, greenSlider, blueSlider;
     private String option;
     private AbstractButtonWidget element;
     private GuiModOptions optionScreen;
+    private int currentColor;
 
-    private int standardColors[] = { 
-        0x000000, 0x0000AA, 0x00AA00, 0x00AAAA,
-        0xAA0000, 0xAA00AA, 0xFFAA00, 0xAAAAAA, 
-        0x555555, 0x5555FF, 0x55FF55, 0x55FFFF,
-        0xFF5555, 0xFF55FF, 0xFFFF55, 0xFFFFFF
-    };
-
-    public ColorPicker(GuiModOptions optionScreen, Text message) {
-        super(0, 0, 120, 120, message);
-        buttons = new ColorButton[16];
+    public ColorPicker(GuiModOptions optionScreen, int initialRGB, Text message) {
+        super(0, 0, 250, 100, message);
+        this.currentColor = initialRGB;
+        this.optionScreen = optionScreen;
     }
 
     public void init() {
         Text buttonText = new LiteralText("");
         this.x = (optionScreen.width - width) / 2;
         this.y = (optionScreen.height - height) / 2;
-        for (int i=0; i<16; i++) {
-            buttons[i]=new ColorButton(
-                this, x + (i/4) * 25, y + (i%4)*25, 20, 20, buttonText, i, standardColors[i]
-            );
-        }
+        colorDisplay = new ColorDisplayAreaButton(
+            this, x, y, 20, 100, buttonText, currentColor
+        );
+        redSlider = new GuiSlider(this, x+50, y, 200, 20, (currentColor>>16)&0xff, 0, 255, "red");
+        greenSlider = new GuiSlider(this, x+50, y+40, 200, 20, (currentColor>>16)&0xff, 0, 255, "green");
+        blueSlider = new GuiSlider(this, x+50, y+80, 200, 20, (currentColor>>16)&0xff, 0, 255, "blue");
         visible = false;
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (visible) {
-            for (int i=0; i<buttons.length; i++) {
-                if (buttons[i].mouseClicked(mouseX, mouseY, button))
-                    return true;
+            if (redSlider.mouseClicked(mouseX, mouseY, button)
+            ||  greenSlider.mouseClicked(mouseX, mouseY, button)
+            ||  blueSlider.mouseClicked(mouseX, mouseY, button)) {
+                return true;
             }
         }
         return false;
@@ -61,10 +59,13 @@ public class ColorPicker extends AbstractButtonWidget {
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         if (visible) {
-            // renderButton(stack, mouseX, mouseY, partialTicks);
-            for (int i=0; i<16; i++) {
-                buttons[i].render(stack, mouseX, mouseY, partialTicks);
-            }
+            optionScreen.getTextRenderer().draw(stack, "R", x+30, y+10, 0xff0000);
+            optionScreen.getTextRenderer().draw(stack, "G", x+30, y+50, 0x00ff00);
+            optionScreen.getTextRenderer().draw(stack, "B", x+30, y+90, 0x0000ff);
+            colorDisplay.render(stack, mouseX, mouseY, partialTicks);
+            redSlider.render(stack, mouseX, mouseY, alpha);
+            greenSlider.render(stack, mouseX, mouseY, alpha);
+            blueSlider.render(stack, mouseX, mouseY, alpha);
         }
     }
 
@@ -73,62 +74,83 @@ public class ColorPicker extends AbstractButtonWidget {
         this.element = element;
     }
 
-    public void setCurrentColor(ConfigurationMinecraftColor color) {
-        currentColor = color;
+    public void setCurrentColor(ConfigurationTrueColor color) {
+        currentColor = color.getInt();
+        colorDisplay.setColor(currentColor);
+        redSlider.sliderValue = color.red / 255.0;
+        greenSlider.sliderValue = color.green / 255.0;
+        blueSlider.sliderValue = color.blue / 255.0;
     }
 
-    public ConfigurationMinecraftColor getCurrentColor() {
-        return currentColor;
+    public ConfigurationTrueColor getCurrentColor() {
+        return new ConfigurationTrueColor(currentColor);
     }
 
-    public void onColorSelected(int color) {
-        currentColor.colorIndex = color;
-        optionScreen.onConfigChanging(option, currentColor);
+    public void onDoneButton() {
+        optionScreen.onConfigChanging(option, new ConfigurationTrueColor(currentColor));
         element.setMessage(null);
         optionScreen.subscreenFinished();
     }
 
-    private class ColorButton extends AbstractButtonWidget {
+    @Override
+    public void onConfigChanging(String color, Object value) {
+        if (color.equals("red")) {
+            currentColor = (currentColor & 0x00ffff) | ((int)(Integer)value) << 16;
+        }
+        else if (color.equals("green")) {
+            currentColor = (currentColor & 0xff00ff) | ((int)(Integer)value) << 8;
+        }
+        else if (color.equals("blue")) {
+            currentColor = (currentColor & 0xffff00) | ((int)(Integer)value);
+        }
+        colorDisplay.setColor(currentColor);
+        optionScreen.onConfigChanging(option, new ConfigurationTrueColor(currentColor));
+    }
+
+    @Override
+    public boolean wasMouseReleased() {
+        return optionScreen.wasMouseReleased();
+    }
+    
+    @Override
+    public void setMouseReleased(boolean value) {
+        optionScreen.setMouseReleased(value);
+    }
+
+    private class ColorDisplayAreaButton extends AbstractButtonWidget {
 
         private final ColorPicker parent;
-        private final int index;
-        private final int color;
+        private int rgb;
 
-        public ColorButton(ColorPicker parent, int x, int y, int width, int height, Text message, int index, int color) {
+        public ColorDisplayAreaButton(ColorPicker parent, int x, int y, int width, int height, Text message, int rgb) {
             super(x, y, width, height, message);
-            this.index = index;
-            this.color = color;
+            this.rgb = rgb;
             this.parent = parent;
+        }
+        
+        public void setColor(int rgb) {
+            this.rgb = rgb;
         }
 
         @Override
         protected void renderBg(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY) {
             if (this.visible) {
-                super.renderBg(stack, mc, mouseX, mouseY);
+                // super.renderBg(stack, mc, mouseX, mouseY); no this renders an unusable texture
 
                 final Tessellator tessellator = Tessellator.getInstance();
                 final BufferBuilder bufferBuilder = tessellator.getBuffer();
-                float red = ((color >> 16)/255.0f);
-                float green = (((color >> 8) & 0xff)/255.0f);
-                float blue = (((color >> 0) & 0xff) /255.0f);
+                float red = ((rgb >> 16)/255.0f);
+                float green = (((rgb >> 8) & 0xff)/255.0f);
+                float blue = (((rgb >> 0) & 0xff) /255.0f);
 
                 GlStateManager.disableTexture();
 
                 bufferBuilder.begin(GL11.GL_TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
                 Matrix4f model = stack.peek().getModel();
-                int x1=this.x+3;
-                int x2=this.x+this.width-3;
-                int y1=this.y+3;
-                int y2=this.y+this.height-3;
-                if (index == parent.getCurrentColor().colorIndex) {
-                    bufferBuilder.vertex(model, x1, y1, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
-                    bufferBuilder.vertex(model, x1, y2, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
-                    bufferBuilder.vertex(model, x2, y2, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
-                    bufferBuilder.vertex(model, x2, y1, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
-                    tessellator.draw();
-                    bufferBuilder.begin(GL11.GL_TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-                    x1++; y1++; x2--; y2--;
-                }
+                int x1=this.x;
+                int x2=this.x+this.width;
+                int y1=this.y;
+                int y2=this.y+this.height;
                 bufferBuilder.vertex(model, x1, y1, 0.0f).color(red, green, blue, 1.0f).next();
                 bufferBuilder.vertex(model, x1, y2, 0.0f).color(red, green, blue, 1.0f).next();
                 bufferBuilder.vertex(model, x2, y2, 0.0f).color(red, green, blue, 1.0f).next();
@@ -137,12 +159,6 @@ public class ColorPicker extends AbstractButtonWidget {
 
                 GlStateManager.enableTexture();
             }
-        }
-
-        @Override
-        public void onClick(double mouseX, double mouseY) {
-            // System.out.println("selected "+Integer.toHexString(color)+" from button "+this.index);
-            parent.onColorSelected(this.index);
         }
     }
 }

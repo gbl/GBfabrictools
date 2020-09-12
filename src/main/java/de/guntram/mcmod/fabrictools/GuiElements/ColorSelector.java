@@ -33,6 +33,7 @@ public class ColorSelector extends AbstractButtonWidget {
     public ColorSelector(GuiModOptions optionScreen, Text message) {
         super(0, 0, 120, 120, message);
         buttons = new ColorButton[16];
+        this.optionScreen = optionScreen;
     }
 
     public void init() {

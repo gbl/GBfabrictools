@@ -55,6 +55,24 @@ public class Configuration {
             ex.printStackTrace(System.err);
         }
         wasChanged=false;
+        try {
+            for (Map.Entry<String, ConfigurationItem> entry: items.entrySet()) {
+                if (entry.getValue().value instanceof Map) {
+                    Map map = (Map)(Object)entry.getValue().value;
+                    Object type = map.get("type");
+                    if (type == null) {
+                        continue;
+                    } else if (type.equals(ConfigurationMinecraftColor.class.getSimpleName())) {
+                        entry.getValue().value = ConfigurationMinecraftColor.fromJsonMap(map);
+                    } else if (type.equals(ConfigurationTrueColor.class.getSimpleName())) {
+                        entry.getValue().value = ConfigurationTrueColor.fromJsonMap(map);
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            System.err.println("Error when upgrading config file "+configFile.getAbsolutePath()+" - hope for the best");
+            System.err.println("If you experience crashes, delete the file!");
+        }
     }
     
     public boolean hasChanged() {
@@ -97,8 +115,8 @@ public class Configuration {
         return (int) getValue(description, category, defIndex, 0, 15, toolTip, ConfigurationMinecraftColor.class);
     }
 
-    public int getTrueColor(String description, int category, int defIndex, String toolTip) {
-        return (int) getValue(description, category, defIndex, 0, 0xffffff, toolTip, ConfigurationTrueColor.class);
+    public int getRGB(String description, int category, int defRGB, String toolTip) {
+        return (int) getValue(description, category, defRGB, 0, 0xffffff, toolTip, ConfigurationTrueColor.class);
     }
     
     public int getSelection(String description, int category, int defVal, String[] options, String toolTip) {
@@ -148,21 +166,12 @@ public class Configuration {
             float value=(float)(double)(Double) item.value;
             item.value = (Float) value;
             return item.value;
-        } else if (item.value.getClass() == Integer.class && clazz == ConfigurationMinecraftColor.class) {
-            int result = (Integer) item.value;
-            item.value = new ConfigurationMinecraftColor(result);
-            return result;
-        } else if (clazz == ConfigurationMinecraftColor.class) {
+        } else if (item.value.getClass() == ConfigurationMinecraftColor.class && clazz == Integer.class) {
             int  result = ((ConfigurationMinecraftColor)item.value).colorIndex;
             return result;
-        } else if (item.value.getClass() == Integer.class && clazz == ConfigurationTrueColor.class) {
-            int result = (Integer) item.value;
-            item.value = new ConfigurationTrueColor(result);
-            return result;
-        } else if (clazz == ConfigurationTrueColor.class) {
+        } else if (item.value.getClass() == ConfigurationTrueColor.class && clazz == Integer.class) {
             ConfigurationTrueColor tC = ((ConfigurationTrueColor)item.value);
-            Integer result = tC.red << 16 | tC.green << 8 | tC.blue << 0;
-            return result;
+            return tC.getInt();
         }
         item.value=defVal;
         wasChanged=true;
@@ -218,8 +227,9 @@ public class Configuration {
 
     public boolean setValue(String description, Object value) {
         ConfigurationItem item=items.get(description);
-        if (item==null)
+        if (item==null) {
             return false;
+        }
         item.value=value;
         wasChanged=true;
         return true;
