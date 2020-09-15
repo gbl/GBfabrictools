@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @author gbl
  */
-public class VolatileConfiguration implements Configuration {
+public class VolatileConfiguration implements IConfiguration {
     
     private Map<String, ConfigurationItem> items;
     

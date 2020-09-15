@@ -1,7 +1,6 @@
 package de.guntram.mcmod.fabrictools.GuiElements;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import de.guntram.mcmod.fabrictools.Configuration;
 import de.guntram.mcmod.fabrictools.Types.SliderValueConsumer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
@@ -9,6 +8,7 @@ import static net.minecraft.client.gui.widget.AbstractButtonWidget.WIDGETS_LOCAT
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.MathHelper;
+import de.guntram.mcmod.fabrictools.IConfiguration;
 
 public class GuiSlider extends AbstractButtonWidget {
     
@@ -21,7 +21,7 @@ public class GuiSlider extends AbstractButtonWidget {
     SliderValueConsumer parent;
     
     @SuppressWarnings("OverridableMethodCallInConstructor")
-    public GuiSlider(SliderValueConsumer optionScreen, int x, int y, int width, int height, Configuration config, String option) {
+    public GuiSlider(SliderValueConsumer optionScreen, int x, int y, int width, int height, IConfiguration config, String option) {
         super(x, y, width, height, new LiteralText("?"));
         Object value=config.getValue(option);
         if (value instanceof Double) {
