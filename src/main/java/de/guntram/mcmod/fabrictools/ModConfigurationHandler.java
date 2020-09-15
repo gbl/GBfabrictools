@@ -12,5 +12,6 @@ package de.guntram.mcmod.fabrictools;
 public interface ModConfigurationHandler {
     public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event);
     default public void onConfigChanging(ConfigChangedEvent.OnConfigChangingEvent event) {}
-    public IConfiguration getConfig();
+    public Configuration getConfig();
+    default public IConfiguration getIConfig() { return getConfig(); }
 }
