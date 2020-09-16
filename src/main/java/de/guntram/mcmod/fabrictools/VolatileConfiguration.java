@@ -19,7 +19,7 @@ public class VolatileConfiguration implements IConfiguration {
     
     private Map<String, ConfigurationItem> items;
     
-    private void VolatileConfiguration() {
+    public VolatileConfiguration() {
         items = new HashMap<>();
     }
     
@@ -34,7 +34,7 @@ public class VolatileConfiguration implements IConfiguration {
 
     @Override
     public Object getValue(String option) {
-        return items.get(option).value;
+        return items.get(option).getValue();
     }
 
     @Override
@@ -43,7 +43,7 @@ public class VolatileConfiguration implements IConfiguration {
         if (item == null) {
             return false;
         }
-        item.value = value;
+        item.setValue(value);
         return true;
     }
 
@@ -69,7 +69,7 @@ public class VolatileConfiguration implements IConfiguration {
 
     @Override
     public boolean isSelectList(String option) {
-        return items.get(option).defaultValue instanceof ConfigurationSelectList;
+        return items.get(option) instanceof ConfigurationSelectList;
     }
 
     @Override

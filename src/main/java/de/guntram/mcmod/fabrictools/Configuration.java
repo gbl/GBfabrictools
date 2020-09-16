@@ -57,15 +57,15 @@ public class Configuration implements IConfiguration {
         wasChanged=false;
         try {
             for (Map.Entry<String, ConfigurationItem> entry: items.entrySet()) {
-                if (entry.getValue().value instanceof Map) {
-                    Map map = (Map)(Object)entry.getValue().value;
+                if (entry.getValue().getValue() instanceof Map) {
+                    Map map = (Map)(Object)entry.getValue().getValue();
                     Object type = map.get("type");
                     if (type == null) {
                         continue;
                     } else if (type.equals(ConfigurationMinecraftColor.class.getSimpleName())) {
-                        entry.getValue().value = ConfigurationMinecraftColor.fromJsonMap(map);
+                        entry.getValue().setValue(ConfigurationMinecraftColor.fromJsonMap(map));
                     } else if (type.equals(ConfigurationTrueColor.class.getSimpleName())) {
-                        entry.getValue().value = ConfigurationTrueColor.fromJsonMap(map);
+                        entry.getValue().setValue(ConfigurationTrueColor.fromJsonMap(map));
                     }
                 }
             }
@@ -129,7 +129,7 @@ public class Configuration implements IConfiguration {
         else if (!(item instanceof ConfigurationSelectList)) {
             // e.g. we changed the definition from int to list
             // replace the item with a select list but use the item value
-            ConfigurationSelectList list = new ConfigurationSelectList(description, toolTip, options, item.value, defVal);
+            ConfigurationSelectList list = new ConfigurationSelectList(description, toolTip, options, item.getValue(), defVal);
             items.put(description, list);
         }
         return (int) getValue(description, category, defVal, 0, options.length-1, toolTip, Integer.class);
@@ -154,33 +154,33 @@ public class Configuration implements IConfiguration {
         item.toolTip=toolTip;
         item.defaultValue=defVal;
 
-        if (item.value.getClass()==clazz) {
-            return item.value;
-        } else if (item.value.getClass() == Double.class && clazz==Integer.class) {
+        if (item.getValue().getClass()==clazz) {
+            return item.getValue();
+        } else if (item.getValue().getClass() == Double.class && clazz==Integer.class) {
             // repair gson reading int as double
-            int value=(int)(double)(Double) item.value;
-            item.value = (Integer) value;
-            return item.value;
-        } else if (item.value.getClass() == Double.class && clazz==Float.class) {
+            int value=(int)(double)(Double) item.getValue();
+            item.setValue((Integer) value);
+            return item.getValue();
+        } else if (item.getValue().getClass() == Double.class && clazz==Float.class) {
             // repair gson reading int as double
-            float value=(float)(double)(Double) item.value;
-            item.value = (Float) value;
-            return item.value;
-        } else if (item.value.getClass() == ConfigurationMinecraftColor.class && clazz == Integer.class) {
-            int  result = ((ConfigurationMinecraftColor)item.value).colorIndex;
+            float value=(float)(double)(Double) item.getValue();
+            item.setValue((Float) value);
+            return item.getValue();
+        } else if (item.getValue().getClass() == ConfigurationMinecraftColor.class && clazz == Integer.class) {
+            int  result = ((ConfigurationMinecraftColor)item.getValue()).colorIndex;
             return result;
-        } else if (item.value.getClass() == ConfigurationTrueColor.class && clazz == Integer.class) {
-            ConfigurationTrueColor tC = ((ConfigurationTrueColor)item.value);
+        } else if (item.getValue().getClass() == ConfigurationTrueColor.class && clazz == Integer.class) {
+            ConfigurationTrueColor tC = ((ConfigurationTrueColor)item.getValue());
             return tC.getInt();
         }
-        item.value=defVal;
+        item.setValue(defVal);
         wasChanged=true;
         return defVal;
     }
 
     @Override
     public Object getValue(String description) {
-        return items.get(description).value;
+        return items.get(description).getValue();
     }
 
     @Override
@@ -237,7 +237,7 @@ public class Configuration implements IConfiguration {
         if (item==null) {
             return false;
         }
-        item.value=value;
+        item.setValue(value);
         wasChanged=true;
         return true;
     }
