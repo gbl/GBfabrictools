@@ -1,6 +1,7 @@
 package de.guntram.mcmod.fabrictools.GuiElements;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import de.guntram.mcmod.fabrictools.IConfiguration;
 import de.guntram.mcmod.fabrictools.Types.SliderValueConsumer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
@@ -8,7 +9,6 @@ import static net.minecraft.client.gui.widget.AbstractButtonWidget.WIDGETS_LOCAT
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.MathHelper;
-import de.guntram.mcmod.fabrictools.IConfiguration;
 
 public class GuiSlider extends AbstractButtonWidget {
     
@@ -61,6 +61,36 @@ public class GuiSlider extends AbstractButtonWidget {
         this.parent = optionScreen;
     }
 
+    /**
+     * Callable from the outside (parent), to set a new value. Updates the
+     * slider position and text, but does not emit "updated" events.
+     * @param value the new value, in terms between min and max.
+     */
+    public void reinitialize(double value) {
+        this.sliderValue = (value-min)/(max-min);
+        switch (type) {
+            case DOUBLE:
+                this.setMessage(new LiteralText(Double.toString(value)));
+                break;
+            case FLOAT:
+                this.setMessage(new LiteralText(Float.toString((float)value)));
+                break;
+            case INT:
+                this.setMessage(new LiteralText(Integer.toString((int)value)));
+                break;
+        }
+    }
+    
+    /**
+     * Called when the user clicks, drags, or otherwise moves the slider.
+     * Resets the text message to reflect the new value, and tells our
+     * parent the config has changed.
+     * 
+     * @param value The new slider value. As the slider always uses a
+     * range between 0 and 1 internally, this value is expected to 
+     * be in that range too.
+     * 
+     */
     private void updateValue(double value) {
         switch (type) {
             case DOUBLE:

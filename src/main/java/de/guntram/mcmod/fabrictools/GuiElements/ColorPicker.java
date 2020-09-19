@@ -77,9 +77,9 @@ public class ColorPicker extends AbstractButtonWidget implements SliderValueCons
     public void setCurrentColor(ConfigurationTrueColor color) {
         currentColor = color.getInt();
         colorDisplay.setColor(currentColor);
-        redSlider.sliderValue = color.red / 255.0;
-        greenSlider.sliderValue = color.green / 255.0;
-        blueSlider.sliderValue = color.blue / 255.0;
+        redSlider.reinitialize(color.red);
+        greenSlider.reinitialize(color.green);
+        blueSlider.reinitialize(color.blue);
     }
 
     public ConfigurationTrueColor getCurrentColor() {
