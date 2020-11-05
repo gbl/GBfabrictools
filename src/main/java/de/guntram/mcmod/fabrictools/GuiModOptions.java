@@ -18,7 +18,6 @@ import static net.minecraft.client.gui.widget.AbstractButtonWidget.WIDGETS_LOCAT
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -153,10 +152,10 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     @Override
                     public void onFocusedChanged(boolean b) {
                         if (b) {
-                            LOGGER.info("value to textfield");
+                            LOGGER.debug("value to textfield");
                             this.setText((String) handler.getIConfig().getValue(option));
                         } else {
-                            LOGGER.info("textfield to value");
+                            LOGGER.debug("textfield to value");
                             handler.getIConfig().setValue(option, this.getText());
                         }
                         super.onFocusedChanged(b);
@@ -193,10 +192,6 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     public void setMessage(Text ignored) {
                         Object o = handler.getIConfig().getValue(option);
                         int newIndex = ((ConfigurationMinecraftColor)o).colorIndex;
-                        TranslatableText debug1 = new TranslatableText("de.guntram.mcmod.fabrictools.color");       System.out.println("debug1="+debug1);
-                        Formatting debug2 = Formatting.byColorIndex(newIndex);                                      System.out.println("debug2="+debug2);
-                        MutableText debug3 = debug1.formatted(debug2);                                              System.out.println("debug3="+debug3);
-                        System.out.println("getString="+debug3.getString());
                         super.setMessage(new TranslatableText("de.guntram.mcmod.fabrictools.color").formatted(Formatting.byColorIndex(newIndex)));
                     }
                     @Override
