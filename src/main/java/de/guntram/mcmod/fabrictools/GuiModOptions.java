@@ -197,13 +197,13 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     @Override
                     public boolean changeFocus(boolean ignored) { setMessage(null); return ignored; }
                 });
-                element.setMessage(null);
+                element.setMessage(LiteralText.EMPTY);
             } else if (value instanceof ConfigurationTrueColor
                     || value instanceof Integer && (Integer) handler.getIConfig().getMin(option) == 0 && (Integer) handler.getIConfig().getMax(option) == 0xffffff) {
                 if (value instanceof Integer) {
                     handler.getIConfig().setValue(option, new ConfigurationTrueColor((Integer)value));
                 }
-                element=this.addButton(new AbstractButtonWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, null) {
+                element=this.addButton(new AbstractButtonWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, LiteralText.EMPTY) {
                     @Override
                     public void onClick(double x, double y) {
                         enableColorPicker(option, this);
@@ -217,14 +217,14 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     @Override
                     public boolean changeFocus(boolean ignored) { setMessage(null); return ignored; }
                 });
-                element.setMessage(null);
+                element.setMessage(LiteralText.EMPTY);
             } else if (value instanceof Integer || value instanceof Float || value instanceof Double) {
                 element=this.addButton(new GuiSlider(this, this.width/2+10, y, this.buttonWidth, BUTTONHEIGHT, handler.getIConfig(), option));
             } else {
                 LogManager.getLogger().warn(modName +" has option "+option+" with data type "+value.getClass().getName());
                 continue;
             }
-            this.addButton(new AbstractButtonWidget(this.width/2+10+buttonWidth+10, y, BUTTONHEIGHT, BUTTONHEIGHT, new LiteralText("")) {
+            this.addButton(new AbstractButtonWidget(this.width/2+10+buttonWidth+10, y, BUTTONHEIGHT, BUTTONHEIGHT, LiteralText.EMPTY) {
                 @Override
                 public void onClick(double x, double y) {
                     Object value = handler.getIConfig().getValue(option);
@@ -287,8 +287,16 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
             for (String text: options) {
                 if (y > TOP_BAR_SIZE - LINEHEIGHT/2 && y < height - BOTTOM_BAR_SIZE) {
                     if (mouseX>this.width/2-155 && mouseX<this.width/2 && mouseY>y && mouseY<y+BUTTONHEIGHT) {
+                        String ttText = handler.getIConfig().getTooltip(text);
+                        if (ttText == null || ttText.isEmpty()) {
+                            y += LINEHEIGHT;
+                            continue;
+                        }
                         TranslatableText tooltip=new TranslatableText(handler.getIConfig().getTooltip(text));
-                        if (textRenderer.getWidth(tooltip)<=250) {
+                        int width = textRenderer.getWidth(tooltip);
+                        if (width == 0) {
+                            // do nothing
+                        } else if (width<=250) {
                             renderTooltip(stack, tooltip, 0, mouseY);
                         } else {
                             List<OrderedText> lines = textRenderer.wrapLines(tooltip, 250);
