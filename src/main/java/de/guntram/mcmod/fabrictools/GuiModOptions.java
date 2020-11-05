@@ -18,6 +18,7 @@ import static net.minecraft.client.gui.widget.AbstractButtonWidget.WIDGETS_LOCAT
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -183,7 +184,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                 if (value instanceof Integer) {
                     handler.getIConfig().setValue(option, new ConfigurationMinecraftColor((Integer)value));
                 }
-                element=this.addButton(new AbstractButtonWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, null) {
+                element=this.addButton(new AbstractButtonWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, LiteralText.EMPTY) {
                     @Override
                     public void onClick(double x, double y) {
                         enableColorSelector(option, this);
@@ -192,6 +193,10 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     public void setMessage(Text ignored) {
                         Object o = handler.getIConfig().getValue(option);
                         int newIndex = ((ConfigurationMinecraftColor)o).colorIndex;
+                        TranslatableText debug1 = new TranslatableText("de.guntram.mcmod.fabrictools.color");       System.out.println("debug1="+debug1);
+                        Formatting debug2 = Formatting.byColorIndex(newIndex);                                      System.out.println("debug2="+debug2);
+                        MutableText debug3 = debug1.formatted(debug2);                                              System.out.println("debug3="+debug3);
+                        System.out.println("getString="+debug3.getString());
                         super.setMessage(new TranslatableText("de.guntram.mcmod.fabrictools.color").formatted(Formatting.byColorIndex(newIndex)));
                     }
                     @Override
@@ -307,7 +312,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                 drawTexture(stack, width-5, pos+TOP_BAR_SIZE, 0, 66, 4, 20);
             }
         }
-        this.client.getTextureManager().bindTexture(DrawableHelper.BACKGROUND_TEXTURE);
+        this.client.getTextureManager().bindTexture(DrawableHelper.OPTIONS_BACKGROUND_TEXTURE);
         RenderSystem.disableDepthTest();
         drawTexture(stack, 0, 0, 0, 0, width, TOP_BAR_SIZE);
         drawTexture(stack, 0, height-BOTTOM_BAR_SIZE, 0, 0, width, BOTTOM_BAR_SIZE);

@@ -16,7 +16,7 @@ public class GuiSlider extends AbstractButtonWidget {
     
     Type type;
     boolean dragging;
-    double sliderValue, min, max;
+    double sliderValue, defaultValue, min, max;
     String configOption;
     SliderValueConsumer parent;
     
@@ -28,6 +28,7 @@ public class GuiSlider extends AbstractButtonWidget {
             this.setMessage(new LiteralText(Double.toString((Double)value)));
             this.min=(Double)config.getMin(option);
             this.max=(Double)config.getMax(option);
+            this.defaultValue=(Double)config.getDefault(option);
             sliderValue=((Double)value-min)/(max-min);
             type=Type.DOUBLE;
         }
@@ -35,12 +36,14 @@ public class GuiSlider extends AbstractButtonWidget {
             this.setMessage(new LiteralText(Float.toString((Float)value)));
             this.min=(Float)config.getMin(option);
             this.max=(Float)config.getMax(option);
+            this.defaultValue=(Float)config.getDefault(option);
             sliderValue=((Float)value-min)/(max-min);
             type=Type.FLOAT;
         } else {
             this.setMessage(new LiteralText(Integer.toString((Integer)value)));
             this.min=(Integer)config.getMin(option);
             this.max=(Integer)config.getMax(option);
+            this.defaultValue=(Integer)config.getDefault(option);
             sliderValue=((Integer)value-min)/(max-min);
             type=Type.INT;
         }
@@ -51,7 +54,7 @@ public class GuiSlider extends AbstractButtonWidget {
     }
     
     public GuiSlider(SliderValueConsumer optionScreen, int x, int y, int width, int height, int val, int min, int max, String option) {
-        super(x, y, width, height, new LiteralText("?"));
+        super(x, y, width, height, LiteralText.EMPTY);
         this.setMessage(new LiteralText(""+val));
         this.min = min;
         this.max = max;
@@ -95,17 +98,17 @@ public class GuiSlider extends AbstractButtonWidget {
         switch (type) {
             case DOUBLE:
                 double doubleVal=value*(max-min)+min;
-                this.setMessage(new LiteralText(Double.toString(doubleVal)));
+                this.setMessage(new LiteralText(String.format("%.2f", doubleVal)));
                 parent.onConfigChanging(configOption, doubleVal);
                 break;
             case FLOAT:
                 float floatVal=(float) (value*(max-min)+min);
-                this.setMessage(new LiteralText(Float.toString(floatVal)));
+                this.setMessage(new LiteralText(String.format("%.2f", floatVal)));
                 parent.onConfigChanging(configOption, floatVal);
                 break;
             case INT:
-                int intVal=(int) (value*(max-min)+min);
-                this.setMessage(new LiteralText(Integer.toString(intVal)));
+                int intVal=(int) (value*(max-min)+min+0.5);
+                this.setMessage(new LiteralText(String.format("%d", intVal)));
                 parent.onConfigChanging(configOption, intVal);
                 break;
         }
@@ -153,23 +156,12 @@ public class GuiSlider extends AbstractButtonWidget {
     {
         this.dragging = false;
     }
-
+    
     @Override
     public void onFocusedChanged(boolean b) {
-        System.out.println("onFocusChanged; do we miss something?");
-/*        
-        if (type == Type.DOUBLE) {
-            this.setMessage(new LiteralText(Double.toString((Double)value)));
-            sliderValue=((Double)value-min)/(max-min);
-        }
-        else if (type == Type.FLOAT) {
-            this.setMessage(new LiteralText(Float.toString((Float)value)));
-            sliderValue=((Float)value-min)/(max-min);
-        } else {
-            this.setMessage(new LiteralText(Integer.toString((Integer)value)));
-            sliderValue=((Integer)value-min)/(max-min);
-        }
-*/
+        // called when the user presses the "reset" button next to the slider
+        sliderValue=(defaultValue-min)/(max-min);
+        updateValue(sliderValue);
         super.onFocusedChanged(b);
     }
 }
