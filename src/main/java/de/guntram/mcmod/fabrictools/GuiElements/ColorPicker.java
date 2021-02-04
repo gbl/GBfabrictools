@@ -8,12 +8,12 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Matrix4f;
-import org.lwjgl.opengl.GL11;
 
 
 public class ColorPicker extends AbstractButtonWidget implements SliderValueConsumer {
@@ -145,7 +145,7 @@ public class ColorPicker extends AbstractButtonWidget implements SliderValueCons
 
                 GlStateManager.disableTexture();
 
-                bufferBuilder.begin(GL11.GL_TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+                bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
                 Matrix4f model = stack.peek().getModel();
                 int x1=this.x;
                 int x2=this.x+this.width;

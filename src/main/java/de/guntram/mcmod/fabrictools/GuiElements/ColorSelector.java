@@ -7,12 +7,12 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat.DrawMode;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Matrix4f;
-import org.lwjgl.opengl.GL11;
 
 
 public class ColorSelector extends AbstractButtonWidget {
@@ -115,7 +115,7 @@ public class ColorSelector extends AbstractButtonWidget {
 
                 GlStateManager.disableTexture();
 
-                bufferBuilder.begin(GL11.GL_TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+                bufferBuilder.begin(DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
                 Matrix4f model = stack.peek().getModel();
                 int x1=this.x+3;
                 int x2=this.x+this.width-3;
@@ -127,7 +127,7 @@ public class ColorSelector extends AbstractButtonWidget {
                     bufferBuilder.vertex(model, x2, y2, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
                     bufferBuilder.vertex(model, x2, y1, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
                     tessellator.draw();
-                    bufferBuilder.begin(GL11.GL_TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+                    bufferBuilder.begin(DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
                     x1++; y1++; x2--; y2--;
                 }
                 bufferBuilder.vertex(model, x1, y1, 0.0f).color(red, green, blue, 1.0f).next();
