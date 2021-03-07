@@ -45,7 +45,7 @@ public class ConfigurableModList extends Screen {
             });
             x += this.width / 4;
             if (x > this.width) {
-                x = this.width;
+                x = 0;
                 y += 24;
             }
         }
