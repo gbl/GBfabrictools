@@ -29,6 +29,7 @@ public class ConfigurableModList extends Screen {
     protected void init() {
         int y = 10;
         int x = 0;
+        int pos = 0;
         int size = this.width / 4 - 20;
 
         for (String modName: ConfigurationProvider.getRegisteredMods()) {
@@ -44,7 +45,8 @@ public class ConfigurableModList extends Screen {
                 }
             });
             x += this.width / 4;
-            if (x > this.width) {
+            if (++pos >= 4) {
+                pos = 0;
                 x = 0;
                 y += 24;
             }
