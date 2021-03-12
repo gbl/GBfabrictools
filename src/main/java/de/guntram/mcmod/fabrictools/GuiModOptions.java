@@ -311,11 +311,11 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                 // fill(stack, width-5, TOP_BAR_SIZE, width, height - BOTTOM_BAR_SIZE, 0xc0c0c0);
                 int pos = (int)((height - TOP_BAR_SIZE - BOTTOM_BAR_SIZE - BUTTONHEIGHT) * ((float)scrollAmount / maxScroll));
                 // fill(stack, width-5, pos, width, pos+BUTTONHEIGHT, 0x303030);
-                this.client.getTextureManager().bindTexture(WIDGETS_LOCATION);
+                RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
                 drawTexture(stack, width-5, pos+TOP_BAR_SIZE, 0, 66, 4, 20);
             }
         }
-        this.client.getTextureManager().bindTexture(DrawableHelper.OPTIONS_BACKGROUND_TEXTURE);
+        RenderSystem.setShaderTexture(0, DrawableHelper.OPTIONS_BACKGROUND_TEXTURE);
         RenderSystem.disableDepthTest();
         drawTexture(stack, 0, 0, 0, 0, width, TOP_BAR_SIZE);
         drawTexture(stack, 0, height-BOTTOM_BAR_SIZE, 0, 0, width, BOTTOM_BAR_SIZE);

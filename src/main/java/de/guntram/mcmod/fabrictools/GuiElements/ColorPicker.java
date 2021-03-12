@@ -1,19 +1,14 @@
 package de.guntram.mcmod.fabrictools.GuiElements;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import de.guntram.mcmod.fabrictools.GuiModOptions;
 import de.guntram.mcmod.fabrictools.Types.ConfigurationTrueColor;
 import de.guntram.mcmod.fabrictools.Types.SliderValueConsumer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.Matrix4f;
 
 
 public class ColorPicker extends AbstractButtonWidget implements SliderValueConsumer {
@@ -135,29 +130,7 @@ public class ColorPicker extends AbstractButtonWidget implements SliderValueCons
         @Override
         protected void renderBg(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY) {
             if (this.visible) {
-                // super.renderBg(stack, mc, mouseX, mouseY); no this renders an unusable texture
-
-                final Tessellator tessellator = Tessellator.getInstance();
-                final BufferBuilder bufferBuilder = tessellator.getBuffer();
-                float red = ((rgb >> 16)/255.0f);
-                float green = (((rgb >> 8) & 0xff)/255.0f);
-                float blue = (((rgb >> 0) & 0xff) /255.0f);
-
-                GlStateManager.disableTexture();
-
-                bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-                Matrix4f model = stack.peek().getModel();
-                int x1=this.x;
-                int x2=this.x+this.width;
-                int y1=this.y;
-                int y2=this.y+this.height;
-                bufferBuilder.vertex(model, x1, y1, 0.0f).color(red, green, blue, 1.0f).next();
-                bufferBuilder.vertex(model, x1, y2, 0.0f).color(red, green, blue, 1.0f).next();
-                bufferBuilder.vertex(model, x2, y2, 0.0f).color(red, green, blue, 1.0f).next();
-                bufferBuilder.vertex(model, x2, y1, 0.0f).color(red, green, blue, 1.0f).next();
-                tessellator.draw();
-
-                GlStateManager.enableTexture();
+                DrawableHelper.fill(stack, x, y, x+width, y+height, rgb | 0xff000000);
             }
         }
     }

@@ -1,18 +1,13 @@
 package de.guntram.mcmod.fabrictools.GuiElements;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import de.guntram.mcmod.fabrictools.GuiModOptions;
 import de.guntram.mcmod.fabrictools.Types.ConfigurationMinecraftColor;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat.DrawMode;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.Matrix4f;
 
 
 public class ColorSelector extends AbstractButtonWidget {
@@ -106,14 +101,25 @@ public class ColorSelector extends AbstractButtonWidget {
         protected void renderBg(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY) {
             if (this.visible) {
                 super.renderBg(stack, mc, mouseX, mouseY);
+                
+                int x1=this.x+3;
+                int x2=this.x+this.width-3;
+                int y1=this.y+3;
+                int y2=this.y+this.height-3;
+                if (index == parent.getCurrentColor().colorIndex) {
+                    DrawableHelper.fill(stack, x1, y1, x2, y2, 0xffffffff);
+                    x1++; y1++; x2--; y2--;
+                }
+                DrawableHelper.fill(stack, x1, y1, x2, y2, color | 0xff000000);
 
+                /*
                 final Tessellator tessellator = Tessellator.getInstance();
                 final BufferBuilder bufferBuilder = tessellator.getBuffer();
                 float red = ((color >> 16)/255.0f);
                 float green = (((color >> 8) & 0xff)/255.0f);
                 float blue = (((color >> 0) & 0xff) /255.0f);
 
-                GlStateManager.disableTexture();
+                RenderSystem.disableTexture();
 
                 bufferBuilder.begin(DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
                 Matrix4f model = stack.peek().getModel();
@@ -136,7 +142,8 @@ public class ColorSelector extends AbstractButtonWidget {
                 bufferBuilder.vertex(model, x2, y1, 0.0f).color(red, green, blue, 1.0f).next();
                 tessellator.draw();
 
-                GlStateManager.enableTexture();
+                RenderSystem.enableTexture();
+*/
             }
         }
 

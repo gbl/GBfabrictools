@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.4-SNAPSHOT'
+	id 'fabric-loom' version '0.6-SNAPSHOT'
 }
 
 apply plugin: 'maven'
@@ -8,14 +8,14 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 ext.Versions = new Properties()
-Versions.load(file("Versionfiles/mcversion-21w08b.properties").newReader())
+Versions.load(file("Versionfiles/mcversion-21w10a.properties").newReader())
 
 archivesBaseName = "GBfabrictools"
 
 // No, we don't want that in this case, as we want to be able to develop a new
 // version while leaving all current mods on the old version.
 // version = "${Versions['gbfabrictools_version']}"
-version = "1.3.3+${Versions['minecraft_version']}"
+version = "1.3.4+${Versions['minecraft_version']}"
 
 minecraft {
 	refmapName = "de-guntram-mcmod-fabrictools-refmap.json";
