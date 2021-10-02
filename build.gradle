@@ -1,14 +1,13 @@
 plugins {
-	id 'fabric-loom' version '0.6-SNAPSHOT'
+	id 'fabric-loom' version '0.8-SNAPSHOT'
+    id 'maven-publish'
 }
 
-apply plugin: 'maven'
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 16
+targetCompatibility = 16
 
 ext.Versions = new Properties()
-Versions.load(file("Versionfiles/mcversion-21w10a.properties").newReader())
+Versions.load(file("Versionfiles/mcversion-21w37a.properties").newReader())
 
 archivesBaseName = "GBfabrictools"
 
@@ -22,22 +21,18 @@ minecraft {
 }
 
 processResources {
-	inputs.property "version", project.version
+    inputs.property "version", project.version
 
-    from(sourceSets.main.resources.srcDirs) {
-		include "fabric.mod.json"
-		expand "version": project.version
-	}
-	from(sourceSets.main.resources.srcDirs) {
-		exclude "fabric.mod.json"
-	}
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
 }
 
 dependencies {
     minecraft  "com.mojang:minecraft:${Versions['minecraft_version']}"
     mappings   "net.fabricmc:yarn:${Versions['yarn_mappings']}:v2"
-    modCompile "net.fabricmc:fabric-loader:${Versions['loader_version']}"
-    modCompile "net.fabricmc.fabric-api:fabric-api:${Versions['fabric_version']}"
+    modImplementation "net.fabricmc:fabric-loader:${Versions['loader_version']}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${Versions['fabric_version']}"
 }
 
 
@@ -54,14 +49,21 @@ jar {
 }
 
 group = "de.guntram.mcmod"
-uploadArchives {
+publishing {
+    publications {
+		mavenJava(MavenPublication) {
+			artifact(remapJar) {
+			builtBy remapJar
+			}
+		}
+    }
     repositories {
-        mavenDeployer {
-	    repository(url: "file://localhost/tmp/mymavenrepo")
+        maven {
+            url = "file://tmp/mymavenrepo"
         }
     }
 }
 
-task publish(dependsOn: uploadArchives, type: Exec) {
+task mypublish(dependsOn: publish, type: Exec) {
     commandLine "rsync", "-av", "/tmp/mymavenrepo/", "maven@minecraft.guntram.de:/var/www/html/maven/"
 }
