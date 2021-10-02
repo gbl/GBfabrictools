@@ -27,9 +27,9 @@ public class MixinPauseMenuScreen extends Screen {
     @Inject(method="init", at=@At("RETURN"))
     public void addConfigScreen(CallbackInfo ci) {
         if (!FabricLoader.getInstance().isModLoaded("modmenu")) {
-            this.addButton(new TexturedButtonWidget(this.width - 24, 8,
+            this.addDrawableChild(new TexturedButtonWidget(this.width - 24, 8,
                     20, 20, 0, 0, 0, new Identifier("textures/item/written_book.png"), 20, 20, (buttonWidget_1) -> {
-               this.client.openScreen(new ConfigurableModList((Screen)this));
+               this.client.setScreen(new ConfigurableModList((Screen)this));
             }));
         }
     }

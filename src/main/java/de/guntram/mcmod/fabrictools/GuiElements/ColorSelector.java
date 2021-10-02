@@ -4,18 +4,19 @@ import de.guntram.mcmod.fabrictools.GuiModOptions;
 import de.guntram.mcmod.fabrictools.Types.ConfigurationMinecraftColor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 
 
-public class ColorSelector extends AbstractButtonWidget {
+public class ColorSelector extends ClickableWidget {
 
     private ColorButton buttons[];
     private ConfigurationMinecraftColor currentColor;
     private String option;
-    private AbstractButtonWidget element;
+    private ClickableWidget element;
     private GuiModOptions optionScreen;
 
     private int standardColors[] = { 
@@ -64,7 +65,7 @@ public class ColorSelector extends AbstractButtonWidget {
         }
     }
 
-    public void setLink(String option, AbstractButtonWidget element) {
+    public void setLink(String option, ClickableWidget element) {
         this.option = option;
         this.element = element;
     }
@@ -84,7 +85,11 @@ public class ColorSelector extends AbstractButtonWidget {
         optionScreen.subscreenFinished();
     }
 
-    private class ColorButton extends AbstractButtonWidget {
+    @Override
+    public void appendNarrations(NarrationMessageBuilder builder) {
+    }
+
+    private class ColorButton extends ClickableWidget {
 
         private final ColorSelector parent;
         private final int index;
@@ -98,9 +103,9 @@ public class ColorSelector extends AbstractButtonWidget {
         }
 
         @Override
-        protected void renderBg(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY) {
+        protected void renderBackground(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY) {
             if (this.visible) {
-                super.renderBg(stack, mc, mouseX, mouseY);
+                super.renderBackground(stack, mc, mouseX, mouseY);
                 
                 int x1=this.x+3;
                 int x2=this.x+this.width-3;
@@ -111,39 +116,6 @@ public class ColorSelector extends AbstractButtonWidget {
                     x1++; y1++; x2--; y2--;
                 }
                 DrawableHelper.fill(stack, x1, y1, x2, y2, color | 0xff000000);
-
-                /*
-                final Tessellator tessellator = Tessellator.getInstance();
-                final BufferBuilder bufferBuilder = tessellator.getBuffer();
-                float red = ((color >> 16)/255.0f);
-                float green = (((color >> 8) & 0xff)/255.0f);
-                float blue = (((color >> 0) & 0xff) /255.0f);
-
-                RenderSystem.disableTexture();
-
-                bufferBuilder.begin(DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-                Matrix4f model = stack.peek().getModel();
-                int x1=this.x+3;
-                int x2=this.x+this.width-3;
-                int y1=this.y+3;
-                int y2=this.y+this.height-3;
-                if (index == parent.getCurrentColor().colorIndex) {
-                    bufferBuilder.vertex(model, x1, y1, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
-                    bufferBuilder.vertex(model, x1, y2, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
-                    bufferBuilder.vertex(model, x2, y2, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
-                    bufferBuilder.vertex(model, x2, y1, 0.0f).color(1.0f, 1.0f, 1.0f, 1.0f).next();
-                    tessellator.draw();
-                    bufferBuilder.begin(DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-                    x1++; y1++; x2--; y2--;
-                }
-                bufferBuilder.vertex(model, x1, y1, 0.0f).color(red, green, blue, 1.0f).next();
-                bufferBuilder.vertex(model, x1, y2, 0.0f).color(red, green, blue, 1.0f).next();
-                bufferBuilder.vertex(model, x2, y2, 0.0f).color(red, green, blue, 1.0f).next();
-                bufferBuilder.vertex(model, x2, y1, 0.0f).color(red, green, blue, 1.0f).next();
-                tessellator.draw();
-
-                RenderSystem.enableTexture();
-*/
             }
         }
 
@@ -151,6 +123,10 @@ public class ColorSelector extends AbstractButtonWidget {
         public void onClick(double mouseX, double mouseY) {
             // System.out.println("selected "+Integer.toHexString(color)+" from button "+this.index);
             parent.onColorSelected(this.index);
+        }
+
+        @Override
+        public void appendNarrations(NarrationMessageBuilder builder) {
         }
     }
 }

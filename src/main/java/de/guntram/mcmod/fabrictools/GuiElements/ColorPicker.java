@@ -5,18 +5,19 @@ import de.guntram.mcmod.fabrictools.Types.ConfigurationTrueColor;
 import de.guntram.mcmod.fabrictools.Types.SliderValueConsumer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 
 
-public class ColorPicker extends AbstractButtonWidget implements SliderValueConsumer {
+public class ColorPicker extends ClickableWidget implements SliderValueConsumer {
 
     private ColorDisplayAreaButton colorDisplay;
     private GuiSlider redSlider, greenSlider, blueSlider;
     private String option;
-    private AbstractButtonWidget element;
+    private ClickableWidget element;
     private GuiModOptions optionScreen;
     private int currentColor;
 
@@ -64,7 +65,7 @@ public class ColorPicker extends AbstractButtonWidget implements SliderValueCons
         }
     }
 
-    public void setLink(String option, AbstractButtonWidget element) {
+    public void setLink(String option, ClickableWidget element) {
         this.option = option;
         this.element = element;
     }
@@ -112,7 +113,11 @@ public class ColorPicker extends AbstractButtonWidget implements SliderValueCons
         optionScreen.setMouseReleased(value);
     }
 
-    private class ColorDisplayAreaButton extends AbstractButtonWidget {
+    @Override
+    public void appendNarrations(NarrationMessageBuilder builder) {
+    }
+
+    private class ColorDisplayAreaButton extends ClickableWidget {
 
         private final ColorPicker parent;
         private int rgb;
@@ -128,10 +133,14 @@ public class ColorPicker extends AbstractButtonWidget implements SliderValueCons
         }
 
         @Override
-        protected void renderBg(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY) {
+        protected void renderBackground(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY) {
             if (this.visible) {
                 DrawableHelper.fill(stack, x, y, x+width, y+height, rgb | 0xff000000);
             }
+        }
+
+        @Override
+        public void appendNarrations(NarrationMessageBuilder builder) {
         }
     }
 }

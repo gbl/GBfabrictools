@@ -7,7 +7,8 @@ package de.guntram.mcmod.fabrictools;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
@@ -33,15 +34,19 @@ public class ConfigurableModList extends Screen {
         int size = this.width / 4 - 20;
 
         for (String modName: ConfigurationProvider.getRegisteredMods()) {
-            this.addButton(new AbstractButtonWidget(x+10, y, size, 20, new LiteralText(modName)) {
+            this.addDrawableChild(new ClickableWidget(x+10, y, size, 20, new LiteralText(modName)) {
                 @Override
                 public void onClick(double x, double y) {
                     ModConfigurationHandler handler = ConfigurationProvider.getHandler(this.getMessage().asString());
                     if (handler != null) {
-                        MinecraftClient.getInstance().openScreen(
+                        MinecraftClient.getInstance().setScreen(
                                 new GuiModOptions(parent, this.getMessage().asString(), handler)
                         );
                     }
+                }
+
+                @Override
+                public void appendNarrations(NarrationMessageBuilder builder) {
                 }
             });
             x += this.width / 4;

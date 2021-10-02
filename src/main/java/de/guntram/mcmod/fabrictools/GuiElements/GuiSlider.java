@@ -4,14 +4,15 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import de.guntram.mcmod.fabrictools.IConfiguration;
 import de.guntram.mcmod.fabrictools.Types.SliderValueConsumer;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import static net.minecraft.client.gui.widget.AbstractButtonWidget.WIDGETS_LOCATION;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.widget.ClickableWidget;
+import static net.minecraft.client.gui.widget.ClickableWidget.WIDGETS_TEXTURE;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.MathHelper;
 
-public class GuiSlider extends AbstractButtonWidget {
-    
+public class GuiSlider extends ClickableWidget {
+
     private enum Type {INT, FLOAT, DOUBLE;}
     
     Type type;
@@ -115,7 +116,7 @@ public class GuiSlider extends AbstractButtonWidget {
     }
 
     @Override
-    protected void renderBg(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY)
+    protected void renderBackground(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY)
     {
         if (this.visible)
         {
@@ -128,7 +129,7 @@ public class GuiSlider extends AbstractButtonWidget {
                     this.dragging = false;
                 }
             }
-            RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
+            RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             this.drawTexture(stack, this.x + (int)(this.sliderValue * (double)(this.width - 8)), this.y, 0, 66, 4, 20);
             this.drawTexture(stack, this.x + (int)(this.sliderValue * (double)(this.width - 8)) + 4, this.y, 196, 66, 4, 20);
@@ -136,7 +137,7 @@ public class GuiSlider extends AbstractButtonWidget {
     }
 
     /*
-     * Called when the left mouse button is pressed over this button. This method is specific to AbstractButtonWidget.
+     * Called when the left mouse button is pressed over this button. This method is specific to ClickableWidget.
      */
     @Override
     public final void onClick(double mouseX, double mouseY)
@@ -149,7 +150,7 @@ public class GuiSlider extends AbstractButtonWidget {
     }
 
     /*
-     * Called when the left mouse button is released. This method is specific to AbstractButtonWidget.
+     * Called when the left mouse button is released. This method is specific to ClickableWidget.
      */
     @Override
     public void onRelease(double mouseX, double mouseY)
@@ -164,4 +165,8 @@ public class GuiSlider extends AbstractButtonWidget {
         updateValue(sliderValue);
         super.onFocusedChanged(b);
     }
+    
+    @Override
+    public void appendNarrations(NarrationMessageBuilder builder) {
+    }    
 }
