@@ -1,13 +1,13 @@
 plugins {
-	id 'fabric-loom' version '0.8-SNAPSHOT'
+    id 'fabric-loom' version '0.10-SNAPSHOT'
     id 'maven-publish'
 }
 
-sourceCompatibility = 16
-targetCompatibility = 16
+sourceCompatibility = 17
+targetCompatibility = 17
 
 ext.Versions = new Properties()
-Versions.load(file("Versionfiles/mcversion-21w37a.properties").newReader())
+Versions.load(file("Versionfiles/mcversion-1.18.2.properties").newReader())
 
 archivesBaseName = "GBfabrictools"
 
@@ -16,8 +16,8 @@ archivesBaseName = "GBfabrictools"
 // version = "${Versions['gbfabrictools_version']}"
 version = "1.3.4+${Versions['minecraft_version']}"
 
-minecraft {
-	refmapName = "de-guntram-mcmod-fabrictools-refmap.json";
+loom {
+	mixin.defaultRefmapName = "de-guntram-mcmod-fabrictools-refmap.json";
 }
 
 processResources {
@@ -51,11 +51,11 @@ jar {
 group = "de.guntram.mcmod"
 publishing {
     publications {
-		mavenJava(MavenPublication) {
-			artifact(remapJar) {
-			builtBy remapJar
-			}
-		}
+        mavenJava(MavenPublication) {
+            artifact(remapJar) {
+                // builtBy remapJar
+            }
+        }
     }
     repositories {
         maven {
