@@ -19,12 +19,12 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import static net.minecraft.client.gui.widget.ClickableWidget.WIDGETS_TEXTURE;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
+import net.minecraft.screen.ScreenTexts;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 import org.apache.logging.log4j.LogManager;
@@ -52,23 +52,23 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
     private int scrollAmount;
     private int maxScroll;
 
-    private static final Text trueText = new TranslatableText("de.guntram.mcmod.fabrictools.true").formatted(Formatting.GREEN);
-    private static final Text falseText = new TranslatableText("de.guntram.mcmod.fabrictools.false").formatted(Formatting.RED);
+    private static final Text trueText = Text.translatable("de.guntram.mcmod.fabrictools.true").formatted(Formatting.GREEN);
+    private static final Text falseText = Text.translatable("de.guntram.mcmod.fabrictools.false").formatted(Formatting.RED);
     
     private ColorSelector colorSelector;
     private ColorPicker colorPicker;
     
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public GuiModOptions(Screen parent, String modName, ModConfigurationHandler confHandler) {
-        super(new LiteralText(modName));
+        super(Text.literal(modName));
         this.parent=parent;
         this.modName=modName;
         this.handler=confHandler;
         this.screenTitle=modName+" Configuration";
         this.options=handler.getIConfig().getKeys();
         this.LOGGER=LogManager.getLogger();
-        this.colorSelector = new ColorSelector(this, new LiteralText("Minecraft Color"));
-        this.colorPicker = new ColorPicker(this, 0xffffff, new LiteralText("RGB Color"));
+        this.colorSelector = new ColorSelector(this, Text.literal("Minecraft Color"));
+        this.colorPicker = new ColorPicker(this, 0xffffff, Text.literal("RGB Color"));
     }
     
     @Override
@@ -81,7 +81,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
         /* This button should always be in first position so it gets clicks
          * before any scrolled-out-of-visibility buttons do.
          */
-        this.addDrawableChild(new ClickableWidget(this.width / 2 - 100, this.height - 27, 200, BUTTONHEIGHT, new TranslatableText("gui.done")) {
+        this.addDrawableChild(new ClickableWidget(this.width / 2 - 100, this.height - 27, 200, BUTTONHEIGHT, Text.translatable("gui.done")) {
             @Override
             public void onClick(double x, double y) {
                 
@@ -119,7 +119,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                 continue;
             } else if (handler.getIConfig().isSelectList(option)) {
                 String[] options = handler.getIConfig().getListOptions(option);
-                element = this.addDrawableChild(new ClickableWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, new TranslatableText(options[(Integer)value])) {
+                element = this.addDrawableChild(new ClickableWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, Text.translatable(options[(Integer)value])) {
                     @Override
                     public void onClick(double x, double y) {
                         int cur = (Integer) handler.getIConfig().getValue(option);
@@ -132,7 +132,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     @Override
                     public void onFocusedChanged(boolean b) {
                         int cur = (Integer) handler.getIConfig().getValue(option);
-                        this.setMessage(new TranslatableText(options[cur]));
+                        this.setMessage(Text.translatable(options[cur]));
                         super.onFocusedChanged(b);
                     }
 
@@ -162,7 +162,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     }
                 });
             } else if (value instanceof String) {
-                element=this.addDrawableChild(new TextFieldWidget(this.textRenderer, this.width/2+10, y, buttonWidth, BUTTONHEIGHT, new LiteralText((String) value)) {
+                element=this.addDrawableChild(new TextFieldWidget(this.textRenderer, this.width/2+10, y, buttonWidth, BUTTONHEIGHT, Text.literal((String) value)) {
                     @Override
                     public void onFocusedChanged(boolean b) {
                         if (b) {
@@ -197,7 +197,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                 if (value instanceof Integer) {
                     handler.getIConfig().setValue(option, new ConfigurationMinecraftColor((Integer)value));
                 }
-                element=this.addDrawableChild(new ClickableWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, LiteralText.EMPTY) {
+                element=this.addDrawableChild(new ClickableWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, ScreenTexts.EMPTY) {
                     @Override
                     public void onClick(double x, double y) {
                         enableColorSelector(option, this);
@@ -206,7 +206,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     public void setMessage(Text ignored) {
                         Object o = handler.getIConfig().getValue(option);
                         int newIndex = ((ConfigurationMinecraftColor)o).colorIndex;
-                        super.setMessage(new TranslatableText("de.guntram.mcmod.fabrictools.color").formatted(Formatting.byColorIndex(newIndex)));
+                        super.setMessage(Text.translatable("de.guntram.mcmod.fabrictools.color").formatted(Formatting.byColorIndex(newIndex)));
                     }
                     @Override
                     public boolean changeFocus(boolean ignored) { setMessage(null); return ignored; }
@@ -215,13 +215,13 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     public void appendNarrations(NarrationMessageBuilder builder) {
                     }
                 });
-                element.setMessage(LiteralText.EMPTY);
+                element.setMessage(ScreenTexts.EMPTY);
             } else if (value instanceof ConfigurationTrueColor
                     || value instanceof Integer && (Integer) handler.getIConfig().getMin(option) == 0 && (Integer) handler.getIConfig().getMax(option) == 0xffffff) {
                 if (value instanceof Integer) {
                     handler.getIConfig().setValue(option, new ConfigurationTrueColor((Integer)value));
                 }
-                element=this.addDrawableChild(new ClickableWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, LiteralText.EMPTY) {
+                element=this.addDrawableChild(new ClickableWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, ScreenTexts.EMPTY) {
                     @Override
                     public void onClick(double x, double y) {
                         enableColorPicker(option, this);
@@ -230,7 +230,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     public void setMessage(Text ignored) {
                         Object o = handler.getIConfig().getValue(option);
                         int rgb = ((ConfigurationTrueColor)o).getInt();
-                        super.setMessage(new TranslatableText("de.guntram.mcmod.fabrictools.color").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb))));
+                        super.setMessage(Text.translatable("de.guntram.mcmod.fabrictools.color").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb))));
                     }
                     @Override
                     public boolean changeFocus(boolean ignored) { setMessage(null); return ignored; }
@@ -239,14 +239,14 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     public void appendNarrations(NarrationMessageBuilder builder) {
                     }
                 });
-                element.setMessage(LiteralText.EMPTY);
+                element.setMessage(ScreenTexts.EMPTY);
             } else if (value instanceof Integer || value instanceof Float || value instanceof Double) {
                 element=this.addDrawableChild(new GuiSlider(this, this.width/2+10, y, this.buttonWidth, BUTTONHEIGHT, handler.getIConfig(), option));
             } else {
                 LogManager.getLogger().warn(modName +" has option "+option+" with data type "+value.getClass().getName());
                 continue;
             }
-            this.addDrawableChild(new ClickableWidget(this.width/2+10+buttonWidth+10, y, BUTTONHEIGHT, BUTTONHEIGHT, LiteralText.EMPTY) {
+            this.addDrawableChild(new ClickableWidget(this.width/2+10+buttonWidth+10, y, BUTTONHEIGHT, BUTTONHEIGHT, ScreenTexts.EMPTY) {
                 @Override
                 public void onClick(double x, double y) {
                     Object value = handler.getIConfig().getValue(option);
@@ -300,7 +300,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
             int y = TOP_BAR_SIZE + LINEHEIGHT/2 - scrollAmount;
             for (int i=0; i<this.options.size(); i++) {
                 if (y > TOP_BAR_SIZE - LINEHEIGHT/2 && y < height - BOTTOM_BAR_SIZE) {
-                    textRenderer.draw(stack, new TranslatableText(options.get(i)).asOrderedText(), this.width / 2 -155, y+4, 0xffffff);
+                    textRenderer.draw(stack, Text.translatable(options.get(i)).asOrderedText(), this.width / 2 -155, y+4, 0xffffff);
                     ((ClickableWidget)this.children().get(i*2+1)).y = y;                                          // config elem
                     ((ClickableWidget)this.children().get(i*2+1)).render(stack, mouseX, mouseY, partialTicks);
                     ((ClickableWidget)this.children().get(i*2+2)).y = y;                                        // reset button
@@ -318,7 +318,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                             y += LINEHEIGHT;
                             continue;
                         }
-                        TranslatableText tooltip=new TranslatableText(handler.getIConfig().getTooltip(text));
+                        MutableText tooltip=Text.translatable(handler.getIConfig().getTooltip(text));
                         int width = textRenderer.getWidth(tooltip);
                         if (width == 0) {
                             // do nothing

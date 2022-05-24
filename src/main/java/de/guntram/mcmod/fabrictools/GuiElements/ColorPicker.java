@@ -8,7 +8,6 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 
 
@@ -28,7 +27,7 @@ public class ColorPicker extends ClickableWidget implements SliderValueConsumer 
     }
 
     public void init() {
-        Text buttonText = new LiteralText("");
+        Text buttonText = Text.literal("");
         this.x = (optionScreen.width - width) / 2;
         this.y = (optionScreen.height - height) / 2;
         colorDisplay = new ColorDisplayAreaButton(

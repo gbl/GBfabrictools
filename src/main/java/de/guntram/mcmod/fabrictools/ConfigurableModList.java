@@ -5,13 +5,17 @@
  */
 package de.guntram.mcmod.fabrictools;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.TreeSet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 
 /**
  *
@@ -22,7 +26,7 @@ public class ConfigurableModList extends Screen {
     private final Screen parent;
     
     public ConfigurableModList(Screen parent) {
-        super(new LiteralText(I18n.translate("mod.options", new Object[0])));
+        super(Text.literal(I18n.translate("mod.options", new Object[0])));
         this.parent = parent;
     }
     
@@ -33,14 +37,16 @@ public class ConfigurableModList extends Screen {
         int pos = 0;
         int size = this.width / 4 - 20;
 
-        for (String modName: ConfigurationProvider.getRegisteredMods()) {
-            this.addDrawableChild(new ClickableWidget(x+10, y, size, 20, new LiteralText(modName)) {
+        List<String> sortedModNames = new ArrayList<>(ConfigurationProvider.getRegisteredMods());
+        Collections.sort(sortedModNames);
+        for (String modName: sortedModNames) {
+            this.addDrawableChild(new ClickableWidget(x+10, y, size, 20, Text.literal(modName)) {
                 @Override
                 public void onClick(double x, double y) {
-                    ModConfigurationHandler handler = ConfigurationProvider.getHandler(this.getMessage().asString());
+                    ModConfigurationHandler handler = ConfigurationProvider.getHandler(this.getMessage().getString());
                     if (handler != null) {
                         MinecraftClient.getInstance().setScreen(
-                                new GuiModOptions(parent, this.getMessage().asString(), handler)
+                                new GuiModOptions(parent, this.getMessage().getString(), handler)
                         );
                     }
                 }
