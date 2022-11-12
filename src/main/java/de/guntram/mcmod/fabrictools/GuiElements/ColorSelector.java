@@ -33,11 +33,11 @@ public class ColorSelector extends ClickableWidget {
 
     public void init() {
         Text buttonText = Text.literal("");
-        this.x = (optionScreen.width - width) / 2;
-        this.y = (optionScreen.height - height) / 2;
+        this.setX((optionScreen.width - width) / 2);
+        this.setY((optionScreen.height - height) / 2);
         for (int i=0; i<16; i++) {
             buttons[i]=new ColorButton(
-                this, x + (i/4) * 25, y + (i%4)*25, 20, 20, buttonText, i, standardColors[i]
+                this, getX() + (i/4) * 25, getY() + (i%4)*25, 20, 20, buttonText, i, standardColors[i]
             );
         }
         visible = false;
@@ -85,7 +85,7 @@ public class ColorSelector extends ClickableWidget {
     }
 
     @Override
-    public void appendNarrations(NarrationMessageBuilder builder) {
+    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
     }
 
     private class ColorButton extends ClickableWidget {
@@ -106,10 +106,10 @@ public class ColorSelector extends ClickableWidget {
             if (this.visible) {
                 super.renderBackground(stack, mc, mouseX, mouseY);
                 
-                int x1=this.x+3;
-                int x2=this.x+this.width-3;
-                int y1=this.y+3;
-                int y2=this.y+this.height-3;
+                int x1=this.getX()+3;
+                int x2=this.getX()+this.width-3;
+                int y1=this.getY()+3;
+                int y2=this.getY()+this.height-3;
                 if (index == parent.getCurrentColor().colorIndex) {
                     DrawableHelper.fill(stack, x1, y1, x2, y2, 0xffffffff);
                     x1++; y1++; x2--; y2--;
@@ -125,7 +125,7 @@ public class ColorSelector extends ClickableWidget {
         }
 
         @Override
-        public void appendNarrations(NarrationMessageBuilder builder) {
+        protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
         }
     }
 }

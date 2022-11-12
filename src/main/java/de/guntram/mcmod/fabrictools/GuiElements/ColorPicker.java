@@ -28,14 +28,14 @@ public class ColorPicker extends ClickableWidget implements SliderValueConsumer 
 
     public void init() {
         Text buttonText = Text.literal("");
-        this.x = (optionScreen.width - width) / 2;
-        this.y = (optionScreen.height - height) / 2;
+        this.setX((optionScreen.width - width) / 2);
+        this.setY((optionScreen.height - height) / 2);
         colorDisplay = new ColorDisplayAreaButton(
-            this, x, y, 20, 100, buttonText, currentColor
+            this, getX(), getY(), 20, 100, buttonText, currentColor
         );
-        redSlider = new GuiSlider(this, x+50, y, 200, 20, (currentColor>>16)&0xff, 0, 255, "red");
-        greenSlider = new GuiSlider(this, x+50, y+40, 200, 20, (currentColor>>16)&0xff, 0, 255, "green");
-        blueSlider = new GuiSlider(this, x+50, y+80, 200, 20, (currentColor>>16)&0xff, 0, 255, "blue");
+        redSlider = new GuiSlider(this, getX()+50, getY(), 200, 20, (currentColor>>16)&0xff, 0, 255, "red");
+        greenSlider = new GuiSlider(this, getX()+50, getY()+40, 200, 20, (currentColor>>16)&0xff, 0, 255, "green");
+        blueSlider = new GuiSlider(this, getX()+50, getY()+80, 200, 20, (currentColor>>16)&0xff, 0, 255, "blue");
         visible = false;
     }
 
@@ -54,9 +54,9 @@ public class ColorPicker extends ClickableWidget implements SliderValueConsumer 
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         if (visible) {
-            optionScreen.getTextRenderer().draw(stack, "R", x+30, y+10, 0xff0000);
-            optionScreen.getTextRenderer().draw(stack, "G", x+30, y+50, 0x00ff00);
-            optionScreen.getTextRenderer().draw(stack, "B", x+30, y+90, 0x0000ff);
+            optionScreen.getTextRenderer().draw(stack, "R", getX()+30, getY()+10, 0xff0000);
+            optionScreen.getTextRenderer().draw(stack, "G", getX()+30, getY()+50, 0x00ff00);
+            optionScreen.getTextRenderer().draw(stack, "B", getX()+30, getY()+90, 0x0000ff);
             colorDisplay.render(stack, mouseX, mouseY, partialTicks);
             redSlider.render(stack, mouseX, mouseY, alpha);
             greenSlider.render(stack, mouseX, mouseY, alpha);
@@ -113,7 +113,7 @@ public class ColorPicker extends ClickableWidget implements SliderValueConsumer 
     }
 
     @Override
-    public void appendNarrations(NarrationMessageBuilder builder) {
+    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
     }
 
     private class ColorDisplayAreaButton extends ClickableWidget {
@@ -134,12 +134,12 @@ public class ColorPicker extends ClickableWidget implements SliderValueConsumer 
         @Override
         protected void renderBackground(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY) {
             if (this.visible) {
-                DrawableHelper.fill(stack, x, y, x+width, y+height, rgb | 0xff000000);
+                DrawableHelper.fill(stack, getX(), getY(), getX()+width, getY()+height, rgb | 0xff000000);
             }
         }
 
         @Override
-        public void appendNarrations(NarrationMessageBuilder builder) {
+        protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
         }
     }
 }

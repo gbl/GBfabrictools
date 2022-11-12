@@ -105,7 +105,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
             }
 
             @Override
-            public void appendNarrations(NarrationMessageBuilder builder) {
+            protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
             }
         });
 
@@ -137,7 +137,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     }
 
                     @Override
-                    public void appendNarrations(NarrationMessageBuilder builder) {
+                    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
                     }
                 });
             } else if (value instanceof Boolean) {
@@ -158,7 +158,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     }
 
                     @Override
-                    public void appendNarrations(NarrationMessageBuilder builder) {
+                    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
                     }
                 });
             } else if (value instanceof String) {
@@ -212,7 +212,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     public boolean changeFocus(boolean ignored) { setMessage(null); return ignored; }
 
                     @Override
-                    public void appendNarrations(NarrationMessageBuilder builder) {
+                    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
                     }
                 });
                 element.setMessage(ScreenTexts.EMPTY);
@@ -236,7 +236,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     public boolean changeFocus(boolean ignored) { setMessage(null); return ignored; }
 
                     @Override
-                    public void appendNarrations(NarrationMessageBuilder builder) {
+                    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
                     }
                 });
                 element.setMessage(ScreenTexts.EMPTY);
@@ -261,7 +261,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                 }
 
                 @Override
-                public void appendNarrations(NarrationMessageBuilder builder) {
+                protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
                 }
             });
         }
@@ -301,9 +301,9 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
             for (int i=0; i<this.options.size(); i++) {
                 if (y > TOP_BAR_SIZE - LINEHEIGHT/2 && y < height - BOTTOM_BAR_SIZE) {
                     textRenderer.draw(stack, Text.translatable(options.get(i)).asOrderedText(), this.width / 2 -155, y+4, 0xffffff);
-                    ((ClickableWidget)this.children().get(i*2+1)).y = y;                                          // config elem
+                    ((ClickableWidget)this.children().get(i*2+1)).setY(y);                                          // config elem
                     ((ClickableWidget)this.children().get(i*2+1)).render(stack, mouseX, mouseY, partialTicks);
-                    ((ClickableWidget)this.children().get(i*2+2)).y = y;                                        // reset button
+                    ((ClickableWidget)this.children().get(i*2+2)).setY(y);                                        // reset button
                     ((ClickableWidget)this.children().get(i*2+2)).render(stack, mouseX, mouseY, partialTicks);
                 }
                 y += LINEHEIGHT;

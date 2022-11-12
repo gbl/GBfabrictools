@@ -123,7 +123,7 @@ public class GuiSlider extends ClickableWidget {
         {
             if (this.dragging)
             {
-                this.sliderValue = (double)((float)(mouseX - (this.x + 4)) / (float)(this.width - 8));
+                this.sliderValue = (double)((float)(mouseX - (this.getX() + 4)) / (float)(this.width - 8));
                 this.sliderValue = MathHelper.clamp(this.sliderValue, 0.0D, 1.0D);
                 updateValue(this.sliderValue);
                 if (parent.wasMouseReleased()) {
@@ -132,8 +132,8 @@ public class GuiSlider extends ClickableWidget {
             }
             RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            this.drawTexture(stack, this.x + (int)(this.sliderValue * (double)(this.width - 8)), this.y, 0, 66, 4, 20);
-            this.drawTexture(stack, this.x + (int)(this.sliderValue * (double)(this.width - 8)) + 4, this.y, 196, 66, 4, 20);
+            this.drawTexture(stack, this.getX() + (int)(this.sliderValue * (double)(this.width - 8)), this.getY(), 0, 66, 4, 20);
+            this.drawTexture(stack, this.getX() + (int)(this.sliderValue * (double)(this.width - 8)) + 4, this.getY(), 196, 66, 4, 20);
         }
     }
 
@@ -143,7 +143,7 @@ public class GuiSlider extends ClickableWidget {
     @Override
     public final void onClick(double mouseX, double mouseY)
     {
-        this.sliderValue = (mouseX - (double)(this.x + 4)) / (double)(this.width - 8);
+        this.sliderValue = (mouseX - (double)(this.getX() + 4)) / (double)(this.width - 8);
         this.sliderValue = MathHelper.clamp(this.sliderValue, 0.0D, 1.0D);
         updateValue(sliderValue);
         this.dragging = true;
@@ -168,6 +168,6 @@ public class GuiSlider extends ClickableWidget {
     }
     
     @Override
-    public void appendNarrations(NarrationMessageBuilder builder) {
-    }    
+    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
+    }
 }
