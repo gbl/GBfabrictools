@@ -113,7 +113,10 @@ public class ColorPicker extends ClickableWidget implements SliderValueConsumer 
     }
 
     @Override
-    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
+    protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
+    }
+    @Override
+    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
     }
 
     private class ColorDisplayAreaButton extends ClickableWidget {
@@ -132,14 +135,23 @@ public class ColorPicker extends ClickableWidget implements SliderValueConsumer 
         }
 
         @Override
-        protected void renderBackground(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY) {
+        public void render(MatrixStack stack, int mouseX, int mouseY, float delta) {
             if (this.visible) {
                 DrawableHelper.fill(stack, getX(), getY(), getX()+width, getY()+height, rgb | 0xff000000);
             }
+            super.render(stack, mouseX, mouseY, delta);
         }
 
         @Override
-        protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
+        public int getHeight() {
+            return super.getHeight();
+        }
+
+        @Override
+        protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
+        }
+        @Override
+        public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         }
     }
 }

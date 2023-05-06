@@ -51,7 +51,10 @@ public class ConfigurableModList extends Screen {
                     }
                 }
                 @Override
-                protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
+                protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
+                }
+                @Override
+                public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
                 }
             });
             x += this.width / 4;

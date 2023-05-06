@@ -16,6 +16,7 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import static net.minecraft.client.gui.widget.ClickableWidget.WIDGETS_TEXTURE;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -78,13 +79,8 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
             buttonWidth = 200;
         }
 
-        /* This button should always be in first position so it gets clicks
-         * before any scrolled-out-of-visibility buttons do.
-         */
-        this.addDrawableChild(new ClickableWidget(this.width / 2 - 100, this.height - 27, 200, BUTTONHEIGHT, Text.translatable("gui.done")) {
-            @Override
-            public void onClick(double x, double y) {
-                
+        this.addDrawableChild(new ButtonWidget.Builder(Text.translatable("gui.done"), button -> {
+
                 if (colorSelector.visible) {
                     subscreenFinished();
                     return;
@@ -92,22 +88,13 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     colorPicker.onDoneButton();
                     return;
                 }
-                
-                for (Element button: children()) {
-                    if (button instanceof TextFieldWidget) {
-                        if (((TextFieldWidget)button).isFocused()) {
-                            button.changeFocus(false);
-                        }
-                    }
-                }
+
                 handler.onConfigChanged(new ConfigChangedEvent.OnConfigChangedEvent(modName));
                 client.setScreen(parent);
-            }
-
-            @Override
-            protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
-            }
-        });
+            })
+            .dimensions(this.width / 2 - 100, this.height - 27, 200, BUTTONHEIGHT)
+            .build()
+        );
 
         int y=50-LINEHEIGHT;
         for (String option: options) {
@@ -119,27 +106,16 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                 continue;
             } else if (handler.getIConfig().isSelectList(option)) {
                 String[] options = handler.getIConfig().getListOptions(option);
-                element = this.addDrawableChild(new ClickableWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, Text.translatable(options[(Integer)value])) {
-                    @Override
-                    public void onClick(double x, double y) {
-                        int cur = (Integer) handler.getIConfig().getValue(option);
-                        if (++cur == options.length) {
-                            cur = 0;
-                        }
-                        onConfigChanging(option, cur);
-                        this.changeFocus(true);
-                    }
-                    @Override
-                    public void onFocusedChanged(boolean b) {
-                        int cur = (Integer) handler.getIConfig().getValue(option);
-                        this.setMessage(Text.translatable(options[cur]));
-                        super.onFocusedChanged(b);
-                    }
+                element = this.addDrawableChild(ButtonWidget.builder(Text.translatable(options[(Integer) value]), button -> {
+                            int cur = (Integer) handler.getIConfig().getValue(option);
+                            if (++cur == options.length) {
+                                cur = 0;
+                            }
+                            onConfigChanging(option, cur);
+                        })
+                        .dimensions(this.width / 2 + 10, y, buttonWidth, BUTTONHEIGHT)
+                        .build());
 
-                    @Override
-                    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
-                    }
-                });
             } else if (value instanceof Boolean) {
                 element = this.addDrawableChild(new ClickableWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, (Boolean) value == true ? trueText : falseText) {
                     @Override
@@ -149,21 +125,25 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                         } else {
                             onConfigChanging(option, true);
                         }
-                        this.changeFocus(true);
+                        //this.changeFocus(true);
                     }
-                    @Override
+
                     public void onFocusedChanged(boolean b) {
                         this.setMessage((Boolean) handler.getIConfig().getValue(option) == true ? trueText : falseText);
-                        super.onFocusedChanged(b);
+                        //super.onFocusedChanged(b);
                     }
 
                     @Override
-                    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
+                    protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
+                    }
+
+                    @Override
+                    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
                     }
                 });
             } else if (value instanceof String) {
                 element=this.addDrawableChild(new TextFieldWidget(this.textRenderer, this.width/2+10, y, buttonWidth, BUTTONHEIGHT, Text.literal((String) value)) {
-                    @Override
+
                     public void onFocusedChanged(boolean b) {
                         if (b) {
                             LOGGER.debug("value to textfield");
@@ -172,7 +152,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                             LOGGER.debug("textfield to value");
                             handler.getIConfig().setValue(option, this.getText());
                         }
-                        super.onFocusedChanged(b);
+                        //super.onFocusedChanged(b);
                     }
                     @Override
                     public boolean charTyped(char chr, int keyCode) {
@@ -190,7 +170,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     
                 });
                 ((TextFieldWidget) element).setMaxLength(120);
-                element.changeFocus(false);
+                //element.changeFocus(false);
             } else if (value instanceof ConfigurationMinecraftColor
                    ||  value instanceof Integer && (Integer) handler.getIConfig().getMin(option) == 0 && (Integer) handler.getIConfig().getMax(option) == 15) {
                 // upgrade int 0..15 from older mods to color
@@ -208,11 +188,15 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                         int newIndex = ((ConfigurationMinecraftColor)o).colorIndex;
                         super.setMessage(Text.translatable("de.guntram.mcmod.fabrictools.color").formatted(Formatting.byColorIndex(newIndex)));
                     }
-                    @Override
-                    public boolean changeFocus(boolean ignored) { setMessage(null); return ignored; }
+                    //@Override
+                    //public boolean changeFocus(boolean ignored) { setMessage(null); return ignored; }
 
                     @Override
-                    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
+                    protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
+                    }
+
+                    @Override
+                    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
                     }
                 });
                 element.setMessage(ScreenTexts.EMPTY);
@@ -232,11 +216,15 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                         int rgb = ((ConfigurationTrueColor)o).getInt();
                         super.setMessage(Text.translatable("de.guntram.mcmod.fabrictools.color").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb))));
                     }
-                    @Override
-                    public boolean changeFocus(boolean ignored) { setMessage(null); return ignored; }
+                    //@Override
+                    //public boolean changeFocus(boolean ignored) { setMessage(null); return ignored; }
 
                     @Override
-                    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
+                    protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
+                    }
+
+                    @Override
+                    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
                     }
                 });
                 element.setMessage(ScreenTexts.EMPTY);
@@ -257,11 +245,15 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                         defValue = new ConfigurationTrueColor((int) defValue);
                     }
                     onConfigChanging(option, defValue);
-                    element.changeFocus(false);
+                    //element.changeFocus(false);
                 }
 
                 @Override
-                protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
+                protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
+                }
+
+                @Override
+                public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
                 }
             });
         }
@@ -346,7 +338,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
         drawTexture(stack, 0, 0, 0, 0, width, TOP_BAR_SIZE);
         drawTexture(stack, 0, height-BOTTOM_BAR_SIZE, 0, 0, width, BOTTOM_BAR_SIZE);
 
-        drawCenteredText(stack, textRenderer, screenTitle, this.width/2, (TOP_BAR_SIZE - textRenderer.fontHeight)/2, 0xffffff);
+        drawCenteredTextWithShadow(stack, textRenderer, screenTitle, this.width/2, (TOP_BAR_SIZE - textRenderer.fontHeight)/2, 0xffffff);
         ((ClickableWidget)this.children().get(0)).render(stack, mouseX, mouseY, partialTicks);
     }
 

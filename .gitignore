@@ -1,3 +1,6 @@
 .gradle/
 .nb-gradle/
 build/
+.idea
+gradlew
+gradlew.bat

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import de.guntram.mcmod.fabrictools.IConfiguration;
 import de.guntram.mcmod.fabrictools.Types.SliderValueConsumer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import static net.minecraft.client.gui.widget.ClickableWidget.WIDGETS_TEXTURE;
@@ -117,7 +118,7 @@ public class GuiSlider extends ClickableWidget {
     }
 
     @Override
-    protected void renderBackground(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY)
+    public void render(MatrixStack stack, int mouseX, int mouseY, float delta)
     {
         if (this.visible)
         {
@@ -135,8 +136,8 @@ public class GuiSlider extends ClickableWidget {
             this.drawTexture(stack, this.getX() + (int)(this.sliderValue * (double)(this.width - 8)), this.getY(), 0, 66, 4, 20);
             this.drawTexture(stack, this.getX() + (int)(this.sliderValue * (double)(this.width - 8)) + 4, this.getY(), 196, 66, 4, 20);
         }
+        super.render(stack, mouseX, mouseY, delta);
     }
-
     /*
      * Called when the left mouse button is pressed over this button. This method is specific to ClickableWidget.
      */
@@ -159,15 +160,18 @@ public class GuiSlider extends ClickableWidget {
         this.dragging = false;
     }
     
-    @Override
     public void onFocusedChanged(boolean b) {
         // called when the user presses the "reset" button next to the slider
         sliderValue=(defaultValue-min)/(max-min);
         updateValue(sliderValue);
-        super.onFocusedChanged(b);
+        //super.onFocusedChanged(b);
     }
     
     @Override
-    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
+    protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
+    }
+
+    @Override
+    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
     }
 }

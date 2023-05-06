@@ -85,7 +85,11 @@ public class ColorSelector extends ClickableWidget {
     }
 
     @Override
-    protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
+    protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
+    }
+
+    @Override
+    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
     }
 
     private class ColorButton extends ClickableWidget {
@@ -102,10 +106,8 @@ public class ColorSelector extends ClickableWidget {
         }
 
         @Override
-        protected void renderBackground(MatrixStack stack, MinecraftClient mc, int mouseX, int mouseY) {
+        public void render(MatrixStack stack, int mouseX, int mouseY, float offset) {
             if (this.visible) {
-                super.renderBackground(stack, mc, mouseX, mouseY);
-                
                 int x1=this.getX()+3;
                 int x2=this.getX()+this.width-3;
                 int y1=this.getY()+3;
@@ -116,6 +118,7 @@ public class ColorSelector extends ClickableWidget {
                 }
                 DrawableHelper.fill(stack, x1, y1, x2, y2, color | 0xff000000);
             }
+            super.render(stack, mouseX, mouseY, offset);
         }
 
         @Override
@@ -125,7 +128,11 @@ public class ColorSelector extends ClickableWidget {
         }
 
         @Override
-        protected void method_47399(NarrationMessageBuilder narrationMessageBuilder) {
+        protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
+        }
+
+        @Override
+        public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         }
     }
 }
