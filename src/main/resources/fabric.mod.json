@@ -4,14 +4,8 @@
     "version": "${version}",
     "environment": "client",
     "entrypoints": {
-        "client": [ "de.guntram.mcmod.fabrictools.DummyMain" ]
-    },
-    "custom": {
-        "modmenu": {
-            "badges": [
-                "library"
-	    ]
-	}
+        "client": [ "de.guntram.mcmod.fabrictools.TestGBfabrictools" ],
+        "modmenu": [ "de.guntram.mcmod.fabrictools.handler.MMConfigurationHandler" ]
     },
     "mixins": [
       	"mixins.de-guntram-mcmod-fabrictools.json"
@@ -24,5 +18,6 @@
     },
     "name": "GBfabrictools",
     "description": "Provide some shared classes for Giselbaer's mods",
+    "icon": "icon.png",
     "authors": [ "Giselbaer" ]
 }

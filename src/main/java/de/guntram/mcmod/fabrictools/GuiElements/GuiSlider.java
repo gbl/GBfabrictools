@@ -1,67 +1,58 @@
 package de.guntram.mcmod.fabrictools.GuiElements;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import de.guntram.mcmod.fabrictools.IConfiguration;
 import de.guntram.mcmod.fabrictools.Types.SliderValueConsumer;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import static net.minecraft.client.gui.widget.ClickableWidget.WIDGETS_TEXTURE;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 
-public class GuiSlider extends ClickableWidget {
+public class GuiSlider extends SliderWidget {
 
-    private enum Type {INT, FLOAT, DOUBLE;}
-    
+    private enum Type {INT, FLOAT, DOUBLE}
     Type type;
-    boolean dragging;
-    double sliderValue, defaultValue, min, max;
+    double defaultValue, min, max;
     String configOption;
     SliderValueConsumer parent;
-    
+
     @SuppressWarnings("OverridableMethodCallInConstructor")
     public GuiSlider(SliderValueConsumer optionScreen, int x, int y, int width, int height, IConfiguration config, String option) {
-        super(x, y, width, height, Text.literal("?"));
-        Object value=config.getValue(option);
-        if (value instanceof Double) {
-            this.setMessage(Text.literal(Double.toString((Double)value)));
+        super(x, y, width, height, Text.literal("?"), Double.parseDouble(config.getValue(option).toString()));
+        Object currVal=config.getValue(option);
+        if (currVal instanceof Double) {
+            this.setMessage(Text.literal(Double.toString((Double)currVal)));
             this.min=(Double)config.getMin(option);
             this.max=(Double)config.getMax(option);
             this.defaultValue=(Double)config.getDefault(option);
-            sliderValue=((Double)value-min)/(max-min);
+            this.value=((Double)currVal-min)/(max-min);
             type=Type.DOUBLE;
         }
-        else if (value instanceof Float) {
-            this.setMessage(Text.literal(Float.toString((Float)value)));
+        else if (currVal instanceof Float) {
+            this.setMessage(Text.literal(Float.toString((Float)currVal)));
             this.min=(Float)config.getMin(option);
             this.max=(Float)config.getMax(option);
             this.defaultValue=(Float)config.getDefault(option);
-            sliderValue=((Float)value-min)/(max-min);
+            this.value=((Float)currVal-min)/(max-min);
             type=Type.FLOAT;
         } else {
-            this.setMessage(Text.literal(Integer.toString((Integer)value)));
+            this.setMessage(Text.literal(Integer.toString((Integer)currVal)));
             this.min=(Integer)config.getMin(option);
             this.max=(Integer)config.getMax(option);
             this.defaultValue=(Integer)config.getDefault(option);
-            sliderValue=((Integer)value-min)/(max-min);
+            this.value=((Integer)currVal-min)/(max-min);
             type=Type.INT;
         }
-
         this.configOption=option;
         this.parent = optionScreen;
         optionScreen.setMouseReleased(false);
     }
     
     public GuiSlider(SliderValueConsumer optionScreen, int x, int y, int width, int height, int val, int min, int max, String option) {
-        super(x, y, width, height, ScreenTexts.EMPTY);
-        this.setMessage(Text.literal(""+val));
+        super(x, y, width, height, ScreenTexts.EMPTY, val);
+        this.setMessage(Text.literal(Integer.toString(val)));
         this.min = min;
         this.max = max;
-        this.sliderValue=(val-min)/(max-min);
+        this.value=(val-min)/(max-min);
         this.type = Type.INT;
         this.configOption = option;
         this.parent = optionScreen;
@@ -73,7 +64,7 @@ public class GuiSlider extends ClickableWidget {
      * @param value the new value, in terms between min and max.
      */
     public void reinitialize(double value) {
-        this.sliderValue = (value-min)/(max-min);
+        this.value = (value-min)/(max-min);
         switch (type) {
             case DOUBLE:
                 this.setMessage(Text.literal(Double.toString(value)));
@@ -87,16 +78,6 @@ public class GuiSlider extends ClickableWidget {
         }
     }
     
-    /**
-     * Called when the user clicks, drags, or otherwise moves the slider.
-     * Resets the text message to reflect the new value, and tells our
-     * parent the config has changed.
-     * 
-     * @param value The new slider value. As the slider always uses a
-     * range between 0 and 1 internally, this value is expected to 
-     * be in that range too.
-     * 
-     */
     private void updateValue(double value) {
         switch (type) {
             case DOUBLE:
@@ -118,60 +99,19 @@ public class GuiSlider extends ClickableWidget {
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float delta)
-    {
-        if (this.visible)
-        {
-            if (this.dragging)
-            {
-                this.sliderValue = (double)((float)(mouseX - (this.getX() + 4)) / (float)(this.width - 8));
-                this.sliderValue = MathHelper.clamp(this.sliderValue, 0.0D, 1.0D);
-                updateValue(this.sliderValue);
-                if (parent.wasMouseReleased()) {
-                    this.dragging = false;
-                }
-            }
-            RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            this.drawTexture(stack, this.getX() + (int)(this.sliderValue * (double)(this.width - 8)), this.getY(), 0, 66, 4, 20);
-            this.drawTexture(stack, this.getX() + (int)(this.sliderValue * (double)(this.width - 8)) + 4, this.getY(), 196, 66, 4, 20);
-        }
-        super.render(stack, mouseX, mouseY, delta);
-    }
-    /*
-     * Called when the left mouse button is pressed over this button. This method is specific to ClickableWidget.
-     */
-    @Override
-    public final void onClick(double mouseX, double mouseY)
-    {
-        this.sliderValue = (mouseX - (double)(this.getX() + 4)) / (double)(this.width - 8);
-        this.sliderValue = MathHelper.clamp(this.sliderValue, 0.0D, 1.0D);
-        updateValue(sliderValue);
-        this.dragging = true;
-        parent.setMouseReleased(false);
-    }
-
-    /*
-     * Called when the left mouse button is released. This method is specific to ClickableWidget.
-     */
-    @Override
-    public void onRelease(double mouseX, double mouseY)
-    {
-        this.dragging = false;
-    }
-    
-    public void onFocusedChanged(boolean b) {
-        // called when the user presses the "reset" button next to the slider
-        sliderValue=(defaultValue-min)/(max-min);
-        updateValue(sliderValue);
-        //super.onFocusedChanged(b);
-    }
-    
-    @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
+    protected void updateMessage() {
+        updateValue(this.value);
     }
 
     @Override
-    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    protected void applyValue() {
+        updateValue(this.value);
+    }
+
+    @Override
+    public void onClick(double mouseX, double mouseY) {
+        this.value = (mouseX - (double)(this.getX() + 4)) / (double)(this.width - 8);
+        this.value = MathHelper.clamp(this.value, 0.0D, 1.0D);
+        updateValue(this.value);
     }
 }

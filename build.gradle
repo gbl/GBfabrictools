@@ -3,6 +3,15 @@ plugins {
     id 'maven-publish'
 }
 
+repositories {
+    maven {
+        url = "https://maven.fabricmc.net/"
+    }
+    maven {
+        url = "https://maven.terraformersmc.com/releases/"
+    }
+}
+
 sourceCompatibility = 17
 targetCompatibility = 17
 
@@ -33,6 +42,7 @@ dependencies {
     mappings   "net.fabricmc:yarn:${Versions['yarn_mappings']}:v2"
     modImplementation "net.fabricmc:fabric-loader:${Versions['loader_version']}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${Versions['fabric_version']}"
+    modImplementation "com.terraformersmc:modmenu:${Versions['modmenu_version']}"
 }
 
 
