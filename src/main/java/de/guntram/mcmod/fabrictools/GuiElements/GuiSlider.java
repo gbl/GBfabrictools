@@ -77,7 +77,17 @@ public class GuiSlider extends SliderWidget {
                 break;
         }
     }
-    
+
+    /**
+     * Called when the user clicks, drags, or otherwise moves the slider.
+     * Resets the text message to reflect the new value, and tells our
+     * parent the config has changed.
+     *
+     * @param value The new slider value. As the slider always uses a
+     * range between 0 and 1 internally, this value is expected to
+     * be in that range too.
+     *
+     */
     private void updateValue(double value) {
         switch (type) {
             case DOUBLE:

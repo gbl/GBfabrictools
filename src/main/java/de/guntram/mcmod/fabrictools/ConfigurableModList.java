@@ -16,6 +16,7 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import de.guntram.mcmod.fabrictools.GuiElements.GBButtonWidget;
 
 /**
  *
@@ -40,7 +41,7 @@ public class ConfigurableModList extends Screen {
         List<String> sortedModNames = new ArrayList<>(ConfigurationProvider.getRegisteredMods());
         Collections.sort(sortedModNames);
         for (String modName: sortedModNames) {
-            this.addDrawableChild(new ClickableWidget(x+10, y, size, 20, Text.literal(modName)) {
+            this.addDrawableChild(new GBButtonWidget(x+10, y, size, 20, Text.literal(modName)) {
                 @Override
                 public void onClick(double x, double y) {
                     ModConfigurationHandler handler = ConfigurationProvider.getHandler(this.getMessage().getString());
@@ -49,12 +50,6 @@ public class ConfigurableModList extends Screen {
                                 new GuiModOptions(parent, this.getMessage().getString(), handler)
                         );
                     }
-                }
-                @Override
-                protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
-                }
-                @Override
-                public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
                 }
             });
             x += this.width / 4;
