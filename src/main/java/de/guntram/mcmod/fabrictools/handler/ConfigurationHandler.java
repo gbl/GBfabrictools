@@ -22,6 +22,7 @@ public class ConfigurationHandler implements ModConfigurationHandler
     private String test_string;
     private Formatting tooltipColor;
     private int color1;
+    private int color2;
 
     public static ConfigurationHandler getInstance() {
         if (instance==null)
@@ -54,14 +55,14 @@ public class ConfigurationHandler implements ModConfigurationHandler
             switch (event.getItem()) {
                 case "fabrictools.config.choice": choice=(int)(Integer)(event.getNewValue()); break;
                 case "fabrictools.config.bool_test": bool_test=(boolean)(Boolean)(event.getNewValue()); break;
-                case "fabrictools.config.test_string": test_string=(String) event.getNewValue().toString(); break;
+                case "fabrictools.config.test_string": test_string=event.getNewValue().toString(); break;
             }
         }
     }
     
     private void loadConfig() {
         
-        choice=config.getSelection("fabrictools.config.choice", Configuration.CATEGORY_CLIENT, choice,
+        choice=config.getSelection("fabrictools.config.choice", Configuration.CATEGORY_CLIENT, 0,
                 new String[] {
                     "fabrictools.config.choice_one",
                     "fabrictools.config.choice_two",
@@ -70,7 +71,7 @@ public class ConfigurationHandler implements ModConfigurationHandler
                 }, 
                 "fabrictools.config.tt.choice");
         bool_test = config.getBoolean("fabrictools.config.bool_test",
-                Configuration.CATEGORY_CLIENT, bool_test,
+                Configuration.CATEGORY_CLIENT, true,
                 "fabrictools.config.tt.bool_test");
         int_test = config.getInt("fabrictools.config.int_test",
                 Configuration.CATEGORY_CLIENT, 10, 0, 100,
@@ -80,6 +81,8 @@ public class ConfigurationHandler implements ModConfigurationHandler
                 "fabrictools.config.tt.test_string");
         color1 = config.getInt("fabrictools.config.color1",
                 Configuration.CATEGORY_CLIENT, color1, 0, 15, "fabrictools.config.tt.color1");
+        color2 = config.getInt("fabrictools.config.color2",
+                Configuration.CATEGORY_CLIENT, color2, 0, 0xffffff, "fabrictools.config.tt.color2");
         if (config.hasChanged())
             config.save();
     }

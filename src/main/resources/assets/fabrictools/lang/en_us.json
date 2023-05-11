@@ -2,7 +2,7 @@
     "de.guntram.mcmod.fabrictools.true": "true",
     "de.guntram.mcmod.fabrictools.false": "false",
     "de.guntram.mcmod.fabrictools.color": "Color",
-    
+
     "fabrictools.config.choice": "Test choice",
     "fabrictools.config.tt.choice": "Test a configuration choice button",
     "fabrictools.config.choice_one": "Choice one",
@@ -16,5 +16,7 @@
     "fabrictools.config.test_string": "Test string button",
     "fabrictools.config.tt.test_string": "Test string button tooltip",
     "fabrictools.config.color1": "Simple color picker test",
-    "fabrictools.config.tt.color1": "Simple color picker test tooltip"
+    "fabrictools.config.tt.color1": "Simple color picker test tooltip",
+    "fabrictools.config.color2": "New color picker test",
+    "fabrictools.config.tt.color2": "New color picker test tooltip"
 }

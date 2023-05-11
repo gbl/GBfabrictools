@@ -13,11 +13,8 @@ import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import static net.minecraft.client.gui.widget.ClickableWidget.WIDGETS_TEXTURE;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -95,6 +92,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     return;
                 }
 
+                handler.getConfig().save();
                 handler.onConfigChanged(new ConfigChangedEvent.OnConfigChangedEvent(modName));
                 client.setScreen(parent);
             }
@@ -143,26 +141,25 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     }
                 });
             } else if (value instanceof String) {
-                element=this.addDrawableChild(new TextFieldWidget(this.textRenderer, this.width/2+10, y, buttonWidth, BUTTONHEIGHT, Text.literal((String) value)) {
+                element=this.addDrawableChild(new TextFieldWidget(this.textRenderer, this.width/2+10, y, buttonWidth, BUTTONHEIGHT, Text.literal("")) {
                     @Override
-                    public boolean charTyped(char chr, int keyCode) {
-                        boolean result = super.charTyped(chr, keyCode);
-                        handler.onConfigChanging(new OnConfigChangingEvent(modName, option, this.getText()));
-                        return result;
+                    public boolean charTyped(char chr, int modifiers) {
+                        boolean retVal =  super.charTyped(chr, modifiers);
+                        String currVal = this.getText().toString();
+                        onConfigChanging(option, currVal);
+                        return retVal;
                     }
-                    @Override
-                    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-                        boolean result = super.keyPressed(keyCode, scanCode, modifiers);
-                        handler.onConfigChanging(new OnConfigChangingEvent(modName, option, this.getText()));
-                        return result;
-                    }
+
                     @Override
                     public void setFocused(boolean focused) {
-                        this.setText((String) handler.getIConfig().getValue(option));
+                        String currVal = (String) handler.getIConfig().getValue(option);
+                        this.setText(currVal);
                         super.setFocused(focused);
                     }
                 });
                 ((TextFieldWidget) element).setMaxLength(120);
+                ((TextFieldWidget) element).setText((String) value);
+
             } else if (value instanceof ConfigurationMinecraftColor
                     ||  value instanceof Integer && (Integer) handler.getIConfig().getMin(option) == 0 && (Integer) handler.getIConfig().getMax(option) == 15) {
                 // upgrade int 0..15 from older mods to color
@@ -212,7 +209,14 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                 });
                 element.setMessage(ScreenTexts.EMPTY);
             } else if (value instanceof Integer || value instanceof Float || value instanceof Double) {
-                element=this.addDrawableChild(new GuiSlider(this, this.width/2+10, y, this.buttonWidth, BUTTONHEIGHT, handler.getIConfig(), option));
+                element=this.addDrawableChild(new GuiSlider(this, this.width/2+10, y, this.buttonWidth, BUTTONHEIGHT, handler.getIConfig(), option) {
+                    @Override
+                    public void setFocused(boolean focused) {
+                        Double currVal = Double.parseDouble(handler.getIConfig().getValue(option).toString());
+                        reinitialize(currVal);
+                        super.setFocused(focused);
+                    }
+                });
             } else {
                 LogManager.getLogger().warn(modName +" has option "+option+" with data type "+value.getClass().getName());
                 continue;
