@@ -4,8 +4,8 @@
     "version": "${version}",
     "environment": "client",
     "entrypoints": {
-        "client": [ "de.guntram.mcmod.fabrictools.TestGBfabrictools" ],
-        "modmenu": [ "de.guntram.mcmod.fabrictools.handler.MMConfigurationHandler" ]
+        "client": [ "de.guntram.mcmod.fabrictools.DummyMain" ],
+        "hide_modmenu": [ "de.guntram.mcmod.fabrictools.handler.MMConfigurationHandler" ]
     },
     "mixins": [
       	"mixins.de-guntram-mcmod-fabrictools.json"
