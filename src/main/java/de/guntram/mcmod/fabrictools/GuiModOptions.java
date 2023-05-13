@@ -12,7 +12,7 @@ import de.guntram.mcmod.fabrictools.Types.SliderValueConsumer;
 import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import static net.minecraft.client.gui.widget.ClickableWidget.WIDGETS_TEXTURE;
@@ -125,10 +125,10 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     }
                 });
             } else if (value instanceof Boolean) {
-                element = this.addDrawableChild(new GBButtonWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, (Boolean) value == true ? trueText : falseText) {
+                element = this.addDrawableChild(new GBButtonWidget(this.width/2+10, y, buttonWidth, BUTTONHEIGHT, (Boolean) value ? trueText : falseText) {
                     @Override
                     public void onClick(double x, double y) {
-                        if ((Boolean)(handler.getIConfig().getValue(option))==true) {
+                        if ((Boolean)(handler.getIConfig().getValue(option))) {
                             onConfigChanging(option, false);
                         } else {
                             onConfigChanging(option, true);
@@ -136,7 +136,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                     }
                     @Override
                     public void setFocused(boolean focused) {
-                        this.setMessage((Boolean) handler.getIConfig().getValue(option) == true ? trueText : falseText);
+                        this.setMessage((Boolean) handler.getIConfig().getValue(option) ? trueText : falseText);
                         super.setFocused(focused);
                     }
                 });
@@ -212,7 +212,7 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                 element=this.addDrawableChild(new GuiSlider(this, this.width/2+10, y, this.buttonWidth, BUTTONHEIGHT, handler.getIConfig(), option) {
                     @Override
                     public void setFocused(boolean focused) {
-                        Double currVal = Double.parseDouble(handler.getIConfig().getValue(option).toString());
+                        double currVal = Double.parseDouble(handler.getIConfig().getValue(option).toString());
                         reinitialize(currVal);
                         super.setFocused(focused);
                     }
@@ -261,22 +261,22 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-        renderBackground(stack);
-
+    public void render(DrawContext drawContext, int mouseX, int mouseY, float partialTicks) {
+        renderBackground(drawContext);
+        MatrixStack stack = drawContext.getMatrices();
         if (colorSelector.visible) {
-            colorSelector.render(stack, mouseX, mouseY, partialTicks);
+            colorSelector.render(drawContext, mouseX, mouseY, partialTicks);
         } else if (colorPicker.visible) {
-            colorPicker.render(stack, mouseX, mouseY, partialTicks);
+            colorPicker.render(drawContext, mouseX, mouseY, partialTicks);
         } else {
             int y = TOP_BAR_SIZE + LINEHEIGHT/2 - scrollAmount;
             for (int i=0; i<this.options.size(); i++) {
                 if (y > TOP_BAR_SIZE - LINEHEIGHT/2 && y < height - BOTTOM_BAR_SIZE) {
-                    textRenderer.draw(stack, Text.translatable(options.get(i)).asOrderedText(), this.width / 2 -155, y+4, 0xffffff);
+                    drawContext.drawText(textRenderer, Text.translatable(options.get(i)).asOrderedText(), this.width / 2 -155, y+4, 0xffffff, false);
                     ((ClickableWidget)this.children().get(i*2+1)).setY(y);                                          // config elem
-                    ((ClickableWidget)this.children().get(i*2+1)).render(stack, mouseX, mouseY, partialTicks);
+                    ((ClickableWidget)this.children().get(i*2+1)).render(drawContext, mouseX, mouseY, partialTicks);
                     ((ClickableWidget)this.children().get(i*2+2)).setY(y);                                        // reset button
-                    ((ClickableWidget)this.children().get(i*2+2)).render(stack, mouseX, mouseY, partialTicks);
+                    ((ClickableWidget)this.children().get(i*2+2)).render(drawContext, mouseX, mouseY, partialTicks);
                 }
                 y += LINEHEIGHT;
             }
@@ -295,10 +295,10 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                         if (width == 0) {
                             // do nothing
                         } else if (width<=250) {
-                            renderTooltip(stack, tooltip, 0, mouseY);
+                            drawContext.drawTooltip(textRenderer, tooltip, 0, mouseY);
                         } else {
                             List<OrderedText> lines = textRenderer.wrapLines(tooltip, 250);
-                            renderOrderedTooltip(stack, lines, 0, mouseY);
+                            drawContext.drawOrderedTooltip(textRenderer, lines, 0, mouseY);
                         }
                     }
                 }
@@ -310,16 +310,16 @@ public class GuiModOptions extends Screen implements Supplier<Screen>, SliderVal
                 int pos = (int)((height - TOP_BAR_SIZE - BOTTOM_BAR_SIZE - BUTTONHEIGHT) * ((float)scrollAmount / maxScroll));
                 // fill(stack, width-5, pos, width, pos+BUTTONHEIGHT, 0x303030);
                 RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
-                drawTexture(stack, width-5, pos+TOP_BAR_SIZE, 0, 66, 4, 20);
+                drawContext.drawTexture(WIDGETS_TEXTURE,width-5, pos+TOP_BAR_SIZE, 0, 66, 4, 20);
             }
         }
-        RenderSystem.setShaderTexture(0, DrawableHelper.OPTIONS_BACKGROUND_TEXTURE);
+        RenderSystem.setShaderTexture(0, OPTIONS_BACKGROUND_TEXTURE);
         RenderSystem.disableDepthTest();
-        drawTexture(stack, 0, 0, 0, 0, width, TOP_BAR_SIZE);
-        drawTexture(stack, 0, height-BOTTOM_BAR_SIZE, 0, 0, width, BOTTOM_BAR_SIZE);
+        drawContext.drawTexture(OPTIONS_BACKGROUND_TEXTURE, 0, 0, 0, 0, width, TOP_BAR_SIZE);
+        drawContext.drawTexture(OPTIONS_BACKGROUND_TEXTURE, 0, height-BOTTOM_BAR_SIZE, 0, 0, width, BOTTOM_BAR_SIZE);
 
-        drawCenteredTextWithShadow(stack, textRenderer, screenTitle, this.width/2, (TOP_BAR_SIZE - textRenderer.fontHeight)/2, 0xffffff);
-        ((ClickableWidget)this.children().get(0)).render(stack, mouseX, mouseY, partialTicks);
+        drawContext.drawText(textRenderer, screenTitle, this.width/2, (TOP_BAR_SIZE - textRenderer.fontHeight)/2, 0xffffff, false);
+        ((ClickableWidget)this.children().get(0)).render(drawContext, mouseX, mouseY, partialTicks);
     }
 
     @Override

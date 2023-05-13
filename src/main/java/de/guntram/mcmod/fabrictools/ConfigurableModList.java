@@ -15,6 +15,7 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 import de.guntram.mcmod.fabrictools.GuiElements.GBButtonWidget;
 
@@ -62,8 +63,8 @@ public class ConfigurableModList extends Screen {
     }
     
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-        renderBackground(stack);
-        super.render(stack, mouseX, mouseY, partialTicks);
+    public void render(DrawContext drawContext, int mouseX, int mouseY, float partialTicks) {
+        renderBackground(drawContext);
+        super.render(drawContext, mouseX, mouseY, partialTicks);
     }
 }

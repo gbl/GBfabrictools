@@ -3,7 +3,7 @@ package de.guntram.mcmod.fabrictools.GuiElements;
 import de.guntram.mcmod.fabrictools.GuiModOptions;
 import de.guntram.mcmod.fabrictools.Types.ConfigurationMinecraftColor;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -55,11 +55,11 @@ public class ColorSelector extends ClickableWidget {
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(DrawContext drawContext, int mouseX, int mouseY, float partialTicks) {
         if (visible) {
             // renderButton(stack, mouseX, mouseY, partialTicks);
             for (int i=0; i<16; i++) {
-                buttons[i].render(stack, mouseX, mouseY, partialTicks);
+                buttons[i].render(drawContext, mouseX, mouseY, partialTicks);
             }
         }
     }
@@ -89,7 +89,7 @@ public class ColorSelector extends ClickableWidget {
     }
 
     @Override
-    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void renderButton(DrawContext drawContext, int mouseX, int mouseY, float delta) {
     }
 
     private class ColorButton extends ClickableWidget {
@@ -106,19 +106,19 @@ public class ColorSelector extends ClickableWidget {
         }
 
         @Override
-        public void render(MatrixStack stack, int mouseX, int mouseY, float offset) {
+        public void render(DrawContext drawContext, int mouseX, int mouseY, float offset) {
             if (this.visible) {
                 int x1=this.getX()+3;
                 int x2=this.getX()+this.width-3;
                 int y1=this.getY()+3;
                 int y2=this.getY()+this.height-3;
                 if (index == parent.getCurrentColor().colorIndex) {
-                    DrawableHelper.fill(stack, x1, y1, x2, y2, 0xffffffff);
+                    drawContext.fill(x1, y1, x2, y2, 0xffffffff);
                     x1++; y1++; x2--; y2--;
                 }
-                DrawableHelper.fill(stack, x1, y1, x2, y2, color | 0xff000000);
+                drawContext.fill(x1, y1, x2, y2, color | 0xff000000);
             }
-            super.render(stack, mouseX, mouseY, offset);
+            super.render(drawContext, mouseX, mouseY, offset);
         }
 
         @Override
@@ -132,7 +132,7 @@ public class ColorSelector extends ClickableWidget {
         }
 
         @Override
-        public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        public void renderButton(DrawContext drawContext, int mouseX, int mouseY, float delta) {
         }
     }
 }

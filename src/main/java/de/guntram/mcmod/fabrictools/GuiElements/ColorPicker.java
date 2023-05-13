@@ -4,7 +4,7 @@ import de.guntram.mcmod.fabrictools.GuiModOptions;
 import de.guntram.mcmod.fabrictools.Types.ConfigurationTrueColor;
 import de.guntram.mcmod.fabrictools.Types.SliderValueConsumer;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -52,15 +52,16 @@ public class ColorPicker extends ClickableWidget implements SliderValueConsumer 
     }
 
     @Override
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(DrawContext drawContext, int mouseX, int mouseY, float partialTicks) {
         if (visible) {
-            optionScreen.getTextRenderer().draw(stack, "R", getX()+30, getY()+10, 0xff0000);
-            optionScreen.getTextRenderer().draw(stack, "G", getX()+30, getY()+50, 0x00ff00);
-            optionScreen.getTextRenderer().draw(stack, "B", getX()+30, getY()+90, 0x0000ff);
-            colorDisplay.render(stack, mouseX, mouseY, partialTicks);
-            redSlider.render(stack, mouseX, mouseY, alpha);
-            greenSlider.render(stack, mouseX, mouseY, alpha);
-            blueSlider.render(stack, mouseX, mouseY, alpha);
+            MatrixStack stack = drawContext.getMatrices();
+            drawContext.drawText(optionScreen.getTextRenderer(), "R", getX()+30, getY()+10, 0xff0000, false);
+            drawContext.drawText(optionScreen.getTextRenderer(), "G", getX()+30, getY()+50, 0x00ff00, false);
+            drawContext.drawText(optionScreen.getTextRenderer(), "B", getX()+30, getY()+90, 0x0000ff, false);
+            colorDisplay.render(drawContext, mouseX, mouseY, partialTicks);
+            redSlider.render(drawContext, mouseX, mouseY, alpha);
+            greenSlider.render(drawContext, mouseX, mouseY, alpha);
+            blueSlider.render(drawContext, mouseX, mouseY, alpha);
         }
     }
 
@@ -116,7 +117,7 @@ public class ColorPicker extends ClickableWidget implements SliderValueConsumer 
     protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
     }
     @Override
-    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void renderButton(DrawContext drawContext, int mouseX, int mouseY, float delta) {
     }
 
     private class ColorDisplayAreaButton extends ClickableWidget {
@@ -135,11 +136,11 @@ public class ColorPicker extends ClickableWidget implements SliderValueConsumer 
         }
 
         @Override
-        public void render(MatrixStack stack, int mouseX, int mouseY, float delta) {
+        public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
             if (this.visible) {
-                DrawableHelper.fill(stack, getX(), getY(), getX()+width, getY()+height, rgb | 0xff000000);
+                drawContext.fill(getX(), getY(), getX()+width, getY()+height, rgb | 0xff000000);
             }
-            super.render(stack, mouseX, mouseY, delta);
+            super.render(drawContext, mouseX, mouseY, delta);
         }
 
         @Override
@@ -151,7 +152,7 @@ public class ColorPicker extends ClickableWidget implements SliderValueConsumer 
         protected void appendClickableNarrations(NarrationMessageBuilder narrationMessageBuilder) {
         }
         @Override
-        public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        public void renderButton(DrawContext drawContext, int mouseX, int mouseY, float delta) {
         }
     }
 }
