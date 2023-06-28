@@ -17,7 +17,8 @@
       	"mixins.de-guntram-mcmod-fabrictools.json"
     ],
     "depends": {
-      "fabric": "*"
+      "fabric": "*",
+      "cloth-config2": ">=10.0.96"
     },
     "recommends": {
       "modmenu" : "*"
