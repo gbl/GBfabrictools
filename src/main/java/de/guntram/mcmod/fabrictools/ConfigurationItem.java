@@ -12,8 +12,8 @@ import java.util.function.Consumer;
  * @author gbl
  */
 public class ConfigurationItem {
-    
-    String key;
+
+     String key;
     String toolTip;
     private Object value;
     Object defaultValue;

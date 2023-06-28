@@ -3,7 +3,7 @@
     "package": "de.guntram.mcmod.fabrictools.mixins",
     "refmap": "de-guntram-mcmod-fabrictools-refmap.json",
     "minVersion": "0.6",
-    "client": [
+    "disabled-client": [
         "MixinMainMenuScreen",
         "MixinPauseMenuScreen"
     ],

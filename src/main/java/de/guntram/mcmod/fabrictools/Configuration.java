@@ -110,15 +110,15 @@ public class Configuration implements IConfiguration {
     public String getString(String description, int category, String defVal, String toolTip) {
         return (String) getValue(description, category, defVal, toolTip, String.class);
     }
-    
+
     public int getIndexedColor(String description, int category, int defIndex, String toolTip) {
-        return (int) getValue(description, category, defIndex, 0, 15, toolTip, ConfigurationMinecraftColor.class);
+        return (int) getValue(description, category, defIndex, 0, 15, toolTip, Integer.class);
     }
 
     public int getRGB(String description, int category, int defRGB, String toolTip) {
-        return (int) getValue(description, category, defRGB, 0, 0xffffff, toolTip, ConfigurationTrueColor.class);
+        return (int) getValue(description, category, defRGB, 0, 0xffffff, toolTip, Integer.class);
     }
-    
+
     public int getSelection(String description, int category, int defVal, String[] options, String toolTip) {
         ConfigurationItem item=items.get(description);
         if (item==null) {
@@ -138,11 +138,33 @@ public class Configuration implements IConfiguration {
     public Object getValue(String description, int category, Object defVal, String toolTip, Class clazz) {
         return getValue(description, category, defVal, null, null, toolTip, clazz);
     }
+
+    /**
+     * Gets the value of a configuration item and registers the item in the config list if not present.
+     *
+     * @param description       The key of the config item, like modname.config.somevalue
+     * @param category          The category, which doesn't really do anything but was present in the old Forge system
+     * @param defVal            Default value of the item doesn't exist in the config file
+     * @param minVal            minimum value
+     * @param maxVal            maximum value
+     * @param toolTip           Tooltip to show when hovering over the input widget
+     * @param clazz             The class that is expected to be returned
+     * @return
+     */
     
     public Object getValue(String description, int category, Object defVal, Object minVal, Object maxVal, String toolTip, Class clazz) {
         ConfigurationItem item=items.get(description);
         if (item==null) {
+            /* This requires more work than I'm willing to put in rn ...
+            if (clazz == ConfigurationTrueColor.class) {
+                items.put(description, new ConfigurationTrueColor((int) defVal));
+            } else if (clazz == ConfigurationMinecraftColor.class) {
+
+            } else {
+
+             */
             items.put(description, new ConfigurationItem(description, toolTip, defVal, defVal, minVal, maxVal));
+
             wasChanged=true;
             return defVal;
         }

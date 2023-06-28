@@ -19,4 +19,17 @@ public class ConfigurationSelectList extends ConfigurationItem {
     public String[] getOptions() {
         return options;
     }
+
+    public void setValue(Object value) {
+        if (value instanceof Integer) {
+            super.setValue(value);
+        } else {
+            for (int i=0; i<options.length; i++) {
+                if (options[i].equals(value)) {
+                    super.setValue(i);
+                    break;
+                }
+            }
+        }
+    }
 }
